@@ -26,7 +26,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.Format;
 
-
+/**
+ * @author Dennis
+ *
+ * Fetches and updates various data needed to set alarm times.
+ * Uses the local calendar information (first schedule of the day), traffic information, and weather information.
+ */
 public class DataLoader implements LocationListener {
 
     private static final String[] EVENT_COL = new String[] {
