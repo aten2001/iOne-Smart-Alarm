@@ -27,6 +27,8 @@ public class MainActivity extends ActionBarActivity {
             smartAlarm = new smartAlarmManager(MainActivity.this);
             if(smartAlarm.isActive()) {
                 smartAlarm.setAlarm();
+                smartAlarm.setGetupAlarm(this, 05, 27);
+                //Log.i("MainActivity", "This should have set the getup alarm.");
             }
         }
         // Set the toggle button accordingly
@@ -72,6 +74,7 @@ public class MainActivity extends ActionBarActivity {
             Log.i("MainActivity", "The alarm has reboot alarm enabled");
             // Set the repeated alarm
             smartAlarm.setAlarm();
+            smartAlarm.setGetupAlarm(this, 05, 19);
         }
         else{
             // Disable the alarm from restarting on reboot
