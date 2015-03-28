@@ -2,13 +2,11 @@ package com.team8.ionesmartalarm;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.provider.CalendarContract.Events;
-import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.text.format.Time;
 import android.util.Log;
 
@@ -18,13 +16,13 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.Format;
 
 /**
  * @author Dennis
@@ -32,7 +30,7 @@ import java.text.Format;
  * Fetches and updates various data needed to set alarm times.
  * Uses the local calendar information (first schedule of the day), traffic information, and weather information.
  */
-public class DataLoader implements LocationListener {
+public class DataLoader {
 
     private static final String[] EVENT_COL = new String[] {
             Events.TITLE,
@@ -41,12 +39,9 @@ public class DataLoader implements LocationListener {
             Events.EVENT_LOCATION
     };
 
-    private String firstLocation = null;
-
-    public void startUpdatingTime(Context context) {
+    public long getFirstScheduleTime(Context context) {
         Time t = new Time();
         t.setToNow();
-        t.set(0, 0, 18, t.monthDay, t.month, t.year);
         String dtStart = Long.toString(t.toMillis(false));
         t.set(59, 59, 23, t.monthDay, t.month, t.year);
         String dtEnd = Long.toString(t.toMillis(false));
@@ -57,58 +52,69 @@ public class DataLoader implements LocationListener {
         Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, null);
         mCursor.moveToFirst();
 
-        Log.i("DataLoader", "" + mCursor.getCount()); // TEST
+        long time = mCursor.getCount() == 0 ? -1 : mCursor.getLong(1);
+        mCursor.close();
+        return time;
+    }
 
-        if (mCursor.getCount() != 0) {
-            String title = mCursor.getString(0);
-            long start = mCursor.getLong(1);
-            long end = mCursor.getLong(2);
-            firstLocation = mCursor.getString(3);
+    public String getFirstScheduleLocation(Context context) {
+        Time t = new Time();
+        t.setToNow();
+        String dtStart = Long.toString(t.toMillis(false));
+        t.set(59, 59, 23, t.monthDay, t.month, t.year);
+        String dtEnd = Long.toString(t.toMillis(false));
 
-            Format df = DateFormat.getDateFormat(context);
-            Format tf = DateFormat.getTimeFormat(context);
-            Log.i("DataLoader", "Title: " + title +
-                    ", Start: " + df.format(start) + " " + tf.format(start) +
-                    ", End: " + df.format(end) + " " + tf.format(end) +
-                    ", Location: " + firstLocation); // TEST
+        String selection = "((" + Events.DTSTART + " >= ?) AND (" + Events.DTEND + " <= ?))";
+        String[] selectionArgs = new String[]{dtStart, dtEnd};
 
-            LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 0, this);
+        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, null);
+        mCursor.moveToFirst();
+
+        String location = mCursor.getCount() == 0 ? null : mCursor.getString(3);
+        mCursor.close();
+        return location;
+    }
+
+    public Location getLastLocation(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        String bestProvider = locationManager.getBestProvider(new Criteria(), false);
+        return locationManager.getLastKnownLocation(bestProvider);
+    }
+
+    public void getTrafficTime(Context context, AlarmPrototype alarmPrototype) {
+        Location location = getLastLocation(context);
+        MapLoader mapLoader = new MapLoader(location.getLatitude(), location.getLongitude(), getFirstScheduleLocation(context), alarmPrototype);
+        mapLoader.execute();
+    }
+
+    public void getWeather(Context context, Long time, AlarmPrototype alarmPrototype) {
+        Location location = getLastLocation(context);
+        WeatherLoader weatherLoader = new WeatherLoader(location.getLatitude(), location.getLongitude(), time, alarmPrototype);
+        weatherLoader.execute();
+    }
+
+    private class MapLoader extends AsyncTask<Void, Void, Integer> {
+
+        private double latitude, longitude;
+        private String location;
+        private AlarmPrototype alarmPrototype;
+
+        public MapLoader(double latitude, double longitude, String location, AlarmPrototype alarmPrototype) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.location = location;
+            this.alarmPrototype = alarmPrototype;
         }
 
-        mCursor.close();
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        MapLoader mapLoader = new MapLoader();
-        mapLoader.execute(location.getLatitude(), location.getLongitude());
-        WeatherLoader weatherLoader = new WeatherLoader();
-        weatherLoader.execute(location.getLatitude(), location.getLongitude());
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
-
-    private class MapLoader extends AsyncTask<Double, Void, Integer> {
+        public MapLoader(double latitude, double longitude, String location) {
+            this(latitude, longitude, location, null);
+        }
 
         @Override
-        protected Integer doInBackground(Double... params) {
+        protected Integer doInBackground(Void... params) {
             String url = null;
             try {
-                url = "http://maps.googleapis.com/maps/api/directions/json?origin=" + params[0] + "," + params[1] + "&destination=" + URLEncoder.encode(firstLocation, "UTF-8");
+                url = "http://maps.googleapis.com/maps/api/directions/json?origin=" + latitude + "," + longitude + "&destination=" + URLEncoder.encode(location, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -123,35 +129,75 @@ public class DataLoader implements LocationListener {
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-
             return 0;
         }
 
         @Override
-        protected void onPostExecute(Integer value) {
-            super.onPostExecute(value);
-            Log.i("MapLoader", "value: " + value); // TEST
+        protected void onPostExecute(Integer duration) {
+            super.onPostExecute(duration);
+            Log.i("MapLoader", "duration: " + duration); // TEST
+
+            if (alarmPrototype != null) {
+                alarmPrototype.onMapTaskCompleted(duration);
+            }
         }
     }
 
-    private class WeatherLoader extends AsyncTask<Double, Void, Void> {
+    private class WeatherLoader extends AsyncTask<Void, Void, Integer[]> {
+
+        private double latitude, longitude;
+        private long time;
+        private AlarmPrototype alarmPrototype;
+
+        public WeatherLoader(double latitude, double longitude, long time, AlarmPrototype alarmPrototype) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.time = time / 1000;
+            this.alarmPrototype = alarmPrototype;
+        }
+
+        public WeatherLoader(double latitude, double longitude, long time) {
+            this(latitude, longitude, time, null);
+        }
 
         @Override
-        protected Void doInBackground(Double... params) {
-            String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + params[0] + "&lon=" + params[1];
+        protected Integer[] doInBackground(Void... params) {
+            String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + latitude + "&lon=" + longitude;
             HttpClient client = new DefaultHttpClient();
             HttpGet request = new HttpGet(url);
             try {
                 HttpResponse response = client.execute(request);
                 HttpEntity entity = response.getEntity();
                 String str = EntityUtils.toString(entity);
-                JSONObject json = new JSONObject(str);
-                Log.i("WeatherLoader", "json: " + json.toString()); // TEST
+                JSONArray forecasts = new JSONObject(str).getJSONArray("list");
+                JSONObject forecast = null;
+                for (int i = 0; i < forecasts.length(); i++) {
+                    forecast = forecasts.getJSONObject(i);
+                    long dt = forecast.getLong("dt");
+                    if (Math.abs(dt - time) < 10800) {
+                        break;
+                    }
+                }
+                if (forecast == null) return null;
+                Log.i("WeatherLoader", "forecast: " + forecast.toString()); // TEST
+                Integer[] data = new Integer[2];
+                data[0] = forecast.getJSONObject("main").getInt("temp");
+                data[1] = forecast.getJSONArray("weather").getJSONObject(0).getInt("id");
+                return data;
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Integer[] data) {
+            super.onPostExecute(data);
+            Log.i("WeatherLoader", "temperature: " + data[0] + ", weather code: " + data[1]);
+
+            if (alarmPrototype != null) {
+                alarmPrototype.onWeatherTaskCompleted(data[0], data[1]);
+            }
         }
     }
 }
