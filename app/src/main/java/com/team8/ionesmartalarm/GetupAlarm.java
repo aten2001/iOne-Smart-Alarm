@@ -5,14 +5,14 @@ import android.os.PowerManager;
 import android.text.format.Time;
 import android.util.Log;
 
-public class WakeupAlarm implements AlarmPrototype {
+public class GetupAlarm implements AlarmPrototype {
 
     public void wakeupProcedure(Context context) {
         PowerManager powerManager = (PowerManager) context.getApplicationContext().getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "wakeupAlarm");
 
         wakeLock.acquire();
-        Log.i("wakeupAlarm", "The screen has woken up");
+        Log.i("getupAlarm", "The screen has woken up");
         wakeLock.release();
     }
 
@@ -26,7 +26,7 @@ public class WakeupAlarm implements AlarmPrototype {
         time.setToNow();
         dataLoader.getWeather(context, time.toMillis(false), this);
         Log.d("WakeupAlarm", "time: " + time.toMillis(false)); // TEST
-        // return firstScheduleTime (or default time if unavailable) - duration - (weatherCode == bad ? 10 : 0) - (temperature == extreme ? 10 : 0) - userTime
+        // return firstScheduleTime (or default time if unavailable) - duration - (weatherCode == bad ? 10 : 0) - (temperature == extreme ? 10 : 0)
         return 0;
     }
 
