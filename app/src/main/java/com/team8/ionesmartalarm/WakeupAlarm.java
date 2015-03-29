@@ -34,6 +34,6 @@ public class WakeupAlarm implements AlarmPrototype {
     }
 
     public void onWeatherTaskCompleted(int temperature, int code) {
-        Log.d("WakeupAlarm", "temperature: " + temperature + ", code: " + code); // TEST
+        Log.d("WakeupAlarm", "temperature: " + temperature + ", code: " + code + ", weather: " + Weather.getWeather(code).name()); // TEST
     }
 }
