@@ -1,0 +1,17 @@
+{
+  "uuid": "2ba1d5d1-0868-4a15-b972-eefe5e01d3a0",
+  "shortName": "iOne",
+  "longName": "iOne Smart Alarm",
+  "companyName": "Team 8 - HCI (CS6750)",
+  "versionCode": 1,
+  "versionLabel": "1.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
