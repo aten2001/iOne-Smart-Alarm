@@ -1,6 +1,7 @@
 package com.team8.ionesmartalarm;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.PowerManager;
 import android.text.format.Time;
 import android.util.Log;
@@ -20,14 +21,18 @@ public class GetupAlarm implements AlarmPrototype {
         DataLoader dataLoader = new DataLoader();
         Log.d("WakeupAlarm", "first location: " + dataLoader.getFirstScheduleLocation(context)); // TEST
         Log.d("WakeupAlarm", "first time: " + dataLoader.getFirstScheduleTime(context)); // TEST
-        Log.d("WakeupAlarm", "latitude: " + dataLoader.getLastLocation(context).getLatitude() + ", longitude: " + dataLoader.getLastLocation(context).getLongitude()); // TEST
-        dataLoader.getTrafficTime(context, this);
-        Time time = new Time();
-        time.setToNow();
-        dataLoader.getWeather(context, time.toMillis(false), this);
-        Log.d("WakeupAlarm", "time: " + time.toMillis(false)); // TEST
+        dataLoader.getLastLocation(context, this);
         // return firstScheduleTime (or default time if unavailable) - duration - (weatherCode == bad ? 10 : 0) - (temperature == extreme ? 10 : 0)
         return 0;
+    }
+
+    public void onLocationTaskCompleted(Context context, Location location) {
+        Log.d("WakeupAlarm", "latitude: " + location.getLatitude() + ", longitude: " + location.getLongitude()); // TEST
+        DataLoader dataLoader = new DataLoader();
+        dataLoader.getTrafficTime(context, location, this);
+        Time time = new Time();
+        time.setToNow();
+        dataLoader.getWeather(location, time.toMillis(false), this);
     }
 
     public void onMapTaskCompleted(int duration) {

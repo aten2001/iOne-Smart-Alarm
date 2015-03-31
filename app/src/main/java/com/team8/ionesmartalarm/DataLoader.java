@@ -4,8 +4,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.CalendarContract.Events;
 import android.text.format.Time;
 import android.util.Log;
@@ -75,20 +79,46 @@ public class DataLoader {
         return location;
     }
 
-    public Location getLastLocation(Context context) {
+    public void getLastLocation(final Context context, final AlarmPrototype alarmPrototype) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        String bestProvider = locationManager.getBestProvider(new Criteria(), false);
-        return locationManager.getLastKnownLocation(bestProvider);
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setPowerRequirement(Criteria.POWER_HIGH);
+        String bestProvider = locationManager.getBestProvider(criteria, false);
+        Location location = locationManager.getLastKnownLocation(bestProvider);
+        if (location == null || ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) / 1000000) >= 900000) {   // 15 minutes
+            locationManager.requestSingleUpdate(bestProvider, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    alarmPrototype.onLocationTaskCompleted(context, location);
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+            }, Looper.myLooper());
+        } else {
+            alarmPrototype.onLocationTaskCompleted(context, location);
+        }
     }
 
-    public void getTrafficTime(Context context, AlarmPrototype alarmPrototype) {
-        Location location = getLastLocation(context);
+    public void getTrafficTime(Context context, Location location, AlarmPrototype alarmPrototype) {
         MapLoader mapLoader = new MapLoader(location.getLatitude(), location.getLongitude(), getFirstScheduleLocation(context), alarmPrototype);
         mapLoader.execute();
     }
 
-    public void getWeather(Context context, Long time, AlarmPrototype alarmPrototype) {
-        Location location = getLastLocation(context);
+    public void getWeather(Location location, Long time, AlarmPrototype alarmPrototype) {
         WeatherLoader weatherLoader = new WeatherLoader(location.getLatitude(), location.getLongitude(), time, alarmPrototype);
         weatherLoader.execute();
     }

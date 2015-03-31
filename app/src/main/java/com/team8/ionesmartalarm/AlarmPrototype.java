@@ -1,6 +1,7 @@
 package com.team8.ionesmartalarm;
 
 import android.content.Context;
+import android.location.Location;
 
 public interface AlarmPrototype {
 
@@ -36,6 +37,7 @@ public interface AlarmPrototype {
 
     public void wakeupProcedure(Context context);
     public int calculateAlarmTime(Context context);
+    public void onLocationTaskCompleted(Context context, Location location);
     public void onMapTaskCompleted(int duration);
     public void onWeatherTaskCompleted(int temperature, int code);
 }
