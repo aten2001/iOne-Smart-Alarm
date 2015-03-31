@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class PebbleController {
 
-    private static final UUID ALARM_UUID = UUID.fromString("?????"); // TODO: replace with the actual UUID of the app
+    private static final UUID ALARM_UUID = UUID.fromString("2ba1d5d1-0868-4a15-b972-eefe5e01d3a0");
     private PebbleKit.PebbleDataReceiver alarmDataReceiver = null;
 
     public void beginReceivingDataFromWatch(Context context) {
