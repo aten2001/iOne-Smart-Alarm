@@ -1,44 +1,56 @@
 #include <pebble.h>
 #include "morpheuz.h"
+#include "iOne.h"
 
-/* Function do_alarm modified from the morpheuz source code (alarm.c)*/
 static Window *window;
 static TextLayer *text_layer;
 static TextLayer *time_layer;
 static TextLayer *date_layer;
+static uint16_t biggest_movement = 0;
+static uint16_t shake_cnt = 0;
+static bool wake_up_bool = false;
+static bool get_up_bool = false;
 
 /************************************************************************************/
 /************************************************************************************/
 /************************************************************************************/
-/*  SO WE NEED COMMS HERE. FUNCTION 1 - CHECK FOR MESSAGES, AND ACT; FUNCTION 2 - SEND MESSAGES BASED ON MOVEMENT*/
+/*  LAST ITEM --- TURN ALARM BACK ON IF WAKEUP AND BIGGEST UNDER SOME THRESHOLD FOR SOME PERIOD TIME (5 MINUTES)?*/
 /************************************************************************************/
 /************************************************************************************/
 /************************************************************************************/
 
+/*********************************
+ * Send Alarm On/Off Message     *
+ *********************************/
+/*static void alarm_message(uint8 alarm_set){
+  // Begin dictionary
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
 
-/************************************************************************************/
-/************************************************************************************/
-/************************************************************************************/
-/*  SOMEWHERE NEED TO CHECK IF BIGGEST > THRESHOLD AND AN WAKEUP ALARM IS TRUE THEN
-SOUND THE GRADUAL ALARM. IF GETUP ALARM IS TRUE SOUND THE GETUP ALARM. NEED TO ADD ROUTINE TO TURN OFF ALARM BASED ON SHAKE. ALSO ROUTING TO TURN ALARM BACK ON IF WAKEUP AND BIGGEST UNDER SOME THRESHOLD FOR SOME PERIOD TIME (5 MINUTES)?.
-/************************************************************************************/
-/************************************************************************************/
-/************************************************************************************/
+  // Add a key-value pair
+  dict_write_uint8(iter, ALARM_ON, alarm_set);
+
+  // Send the message!
+  app_message_outbox_send();
+}*/
 
 
 /*********************************
  * Sound gradual alarm           *
  *********************************/
- 
 // Times (in seconds) between each buzz (gives a progressive alarm and gaps between phases)
-static uint8_t alarm_pattern[] = { 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 60 };
+static uint8_t alarm_pattern[] = { 5, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+//Create an array of ON-OFF-ON etc durations in milliseconds
 
 static uint8_t alarm_count;
 static AppTimer *alarm_timer;
 
 #define ALARM_LIMIT (ARRAY_LENGTH(alarm_pattern) * ALARM_PATTERN_MAX_REPEAT)
 
-static void do_alarm(void *data) {
+static void gradual_alarm(void *data) {
+/*
+  alarm_message((unit8) 1)
+*/
 
   // Already hit the limit
   if (alarm_count >= ALARM_LIMIT) {
@@ -51,10 +63,46 @@ static void do_alarm(void *data) {
   else
     vibes_long_pulse();
 
-  // Prepare the time for the next buzz (this gives progressing and phasing)
-  alarm_timer = app_timer_register(((uint16_t) alarm_pattern[alarm_count % (ARRAY_LENGTH(alarm_pattern))]) * 1000, do_alarm, NULL);
+  if (biggest_movement > SHAKE_THRESHOLD)
+    biggest_movement = 0;
+  
+  if (shake_cnt < NUM_SHAKES_TO_TURNOFF)
+    // Prepare the time for the next buzz (this gives progressing and phasing)
+    alarm_timer = app_timer_register(((uint16_t) alarm_pattern[alarm_count % (ARRAY_LENGTH(alarm_pattern))]) * 1000, gradual_alarm, NULL);
+//   else
+//     alarm_message((unit8) 0)  
 
   alarm_count++;
+  
+}
+
+/*********************************
+ *   Sound getup alarm           *
+ *********************************/
+static void getup_alarm(void *data) {
+/*
+  alarm_message((unit8) 1)
+*/
+  //Create an array of ON-OFF-ON etc durations in milliseconds
+  uint32_t getup_segments[] = {850};
+
+  //Create a VibePattern structure with the segments and length of the pattern as fields
+  VibePattern pattern = {
+     .durations = getup_segments,
+     .num_segments = ARRAY_LENGTH(getup_segments), 
+  };
+
+  //Trigger the custom pattern to be executed
+  vibes_enqueue_custom_pattern(pattern);
+  
+  if (biggest_movement > SHAKE_THRESHOLD)
+    biggest_movement = 0;
+    
+  if (shake_cnt < NUM_SHAKES_TO_TURNOFF)
+    // Prepare the time for the next buzz (this gives progressing and phasing)
+    alarm_timer = app_timer_register(1000, getup_alarm, NULL);
+//   else
+//     alarm_message((unit8) 0)
 }
 
 /*****************************************
@@ -118,10 +166,16 @@ static void accel_data_handler(AccelData *data, uint32_t num_samples) {
   // Long lived buffer
   static char s_buffer[128];
 
+  if (biggest > biggest_movement)
+    biggest_movement = biggest;
+    
+  if (biggest > SHAKE_THRESHOLD)
+    shake_cnt += 1;
+    
   // Compose string of all data
   snprintf(s_buffer, sizeof(s_buffer), 
-    "X: %lu\nY: %lu\nZ: %lu\nBiggest: %lu\n", 
-    (unsigned long)avg_x, (unsigned long)avg_y, (unsigned long)avg_z, (unsigned long)biggest
+    "X: %lu\nY: %lu\nZ: %lu\nBiggest: %lu\nShakes: %lu", 
+    (unsigned long)avg_x, (unsigned long)avg_y, (unsigned long)avg_z, (unsigned long)biggest, (unsigned long)shake_cnt
   );
 /************************************************************************************/
 /************************************************************************************/
@@ -164,12 +218,62 @@ static void update_time() {
   strftime(date_buffer, sizeof(date_buffer), "%A, %b %e", tick_time);
   text_layer_set_text(date_layer, date_buffer);
 }
+
 /*********************************
  * Minute Tick Handler           *
  *********************************/
-
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
     update_time();
+}
+
+/*********************************
+ * App Communication Functions   *
+ *********************************/
+static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  // Read first item
+  Tuple *t = dict_read_first(iterator);
+
+  // For all items
+  while(t != NULL) {
+    // Which key was received?
+    switch(t->key) {
+      case WAKE_UP:
+        wake_up_bool = t->value->uint8;
+        if (wake_up_bool == 1){
+          biggest_movement = 0;
+          shake_cnt = 0;
+          gradual_alarm(NULL);
+        }
+        break;
+      case GET_UP:
+        get_up_bool = t->value->uint8;
+        if (get_up_bool == 1){
+          biggest_movement = 0;
+          shake_cnt = 0;
+          getup_alarm(NULL);
+        }
+        break;
+      case ALARM_ON:
+        break;
+      default:
+        APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
+        break;
+    }
+    // Look for next item
+    t = dict_read_next(iterator);
+  }
+}
+
+static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
 /*********************************
@@ -181,11 +285,16 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(text_layer, "Up");
-  do_alarm(NULL);
+  biggest_movement = 0;
+  shake_cnt = 0;
+  gradual_alarm(NULL);
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(text_layer, "Down");
+  biggest_movement = 0;
+  shake_cnt = 0;
+  getup_alarm(NULL);
 }
 
 static void click_config_provider(void *context) {
@@ -193,7 +302,6 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
-
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
 //   GRect bounds = layer_get_bounds(window_layer);
@@ -243,12 +351,21 @@ static void init(void) {
   accel_data_service_subscribe(25, accel_data_handler);
 
   // Choose update rate
-  accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
+  accel_service_set_sampling_rate(ACCEL_SAMPLING_25HZ);
   
   // Subscribe to minute level tick events
   tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
   
   update_time();
+  
+  // Register Android app callbacks
+  app_message_register_inbox_received(inbox_received_callback);
+  app_message_register_inbox_dropped(inbox_dropped_callback);
+  app_message_register_outbox_failed(outbox_failed_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
+  
+  // Open AppMessage
+ app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 }
 
 static void deinit(void) {
