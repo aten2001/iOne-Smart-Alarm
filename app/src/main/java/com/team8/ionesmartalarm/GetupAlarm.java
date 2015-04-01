@@ -1,14 +1,16 @@
 package com.team8.ionesmartalarm;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.text.format.Time;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
 
-public class GetupAlarm implements AlarmPrototype {
+public class GetupAlarm extends Activity implements AlarmPrototype {
 
     private int firstScheduleTime, duration;
     private double temperature;
@@ -18,6 +20,14 @@ public class GetupAlarm implements AlarmPrototype {
         this.firstScheduleTime = this.duration = -1;
         this.temperature = -1;
         this.weather = null;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstance){
+        super.onCreate(savedInstance);
+
+        // Start Calculating the alarm time
+        calculateAlarmTime(this.getApplicationContext());
     }
 
     public void wakeupProcedure(Context context) {

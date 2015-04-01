@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Clayton
@@ -17,9 +19,10 @@ import java.util.Calendar;
 public class SmartAlarmManager {
 
     // The time of day (in hours) that the alarm should trigger an alarm set procedure
-    private static final int SET_ALARM_TIME = 20;
+    private static final int SET_ALARM_TIME = 01;
     private static final String IS_ACTIVE_DATA = "isSetAlarmActive";
     private static final String IS_ACTIVE_GETUP = "isGetupAlarmActive";
+    private static final String HAS_WAKEUP_TRIGGERED = "wakeupTriggered";
     private static final int ALARM_SET_ID = 7009;
     private static final int GETUP_ALARM_ID = 5009;
 
@@ -68,20 +71,33 @@ public class SmartAlarmManager {
         appState.edit().putInt(IS_ACTIVE_DATA, 0).commit();
     }
 
-    public void setGetupAlarm(Context context, int alarmHour, int alarmMinute){
+    public void setGetupAlarm(Context context, Long alarmMilli){
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         // Create the getupAlarmIntent
         getupIntent = new Intent(context, GetupAlarmReceiver.class);
         getupPending = PendingIntent.getBroadcast(context, GETUP_ALARM_ID, getupIntent, 0);
 
+        /*AlarmPrototype alarm;
+        // Get the calculated wakeup time
+        if(appState.getBoolean(HAS_WAKEUP_TRIGGERED, false)){
+            alarm = new GetupAlarm();
+        }
+        else{
+            alarm = new WakeupAlarm();
+        }
+        alarm.calculateAlarmTime(context);
+        int alarmMilli = alarm.getFirstScheduledTime();
+        Long alarmHour = TimeUnit.MILLISECONDS.toHours(alarmMilli);
+        Long alarmMinute = TimeUnit.MILLISECONDS.toDays(alarmMilli);*/
+
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
-        calendar.set(Calendar.MINUTE, alarmMinute);
+        calendar.setTimeInMillis(alarmMilli);
 
         alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), getupPending);
 
         appState.edit().putInt(IS_ACTIVE_GETUP, 1).commit();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Log.i("SmartAlarmManger", "An alarm has been set for: " + dateFormat.format(calendar.getTime()));
     }
 
     public Context getContext(){
@@ -94,5 +110,9 @@ public class SmartAlarmManager {
 
     public boolean isGetupActive(){
         return appState.getInt(IS_ACTIVE_GETUP, 0) == 1;
+    }
+
+    public boolean hasWakeupAlarmTriggered(){
+        return appState.getBoolean(HAS_WAKEUP_TRIGGERED, false);
     }
 }

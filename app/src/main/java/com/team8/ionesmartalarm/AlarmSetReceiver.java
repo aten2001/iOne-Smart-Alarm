@@ -23,7 +23,10 @@ public class AlarmSetReceiver extends BroadcastReceiver {
         if(MainActivity.smartAlarm == null){
             MainActivity.smartAlarm = new SmartAlarmManager(context);
         }
-        // Set a new alarm
-        MainActivity.smartAlarm.setGetupAlarm(context, 01, 19);
+        // Set a new alarm through wakeup
+        Intent newActivity = new Intent(context, WakeupAlarm.class);
+        newActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        newActivity.putExtra("isFirstAlarmSet", true);
+        context.startActivity(newActivity);
     }
 }

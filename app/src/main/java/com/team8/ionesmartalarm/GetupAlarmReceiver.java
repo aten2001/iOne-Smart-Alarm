@@ -12,7 +12,5 @@ public class GetupAlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i("GetupAlarmReceiver", "The getup alarm is called");
-        WakeupAlarm alarm = new WakeupAlarm();
-        alarm.wakeupProcedure(context);
     }
 }

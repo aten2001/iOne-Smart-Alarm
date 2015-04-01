@@ -14,6 +14,10 @@ import android.provider.CalendarContract.Events;
 import android.text.format.Time;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -98,13 +102,15 @@ public class DataLoader {
     }
 
     public void getLastLocation(final Context context, final AlarmPrototype alarmPrototype) {
+        Log.i("DataLoader", "I am in the getLastLocation");
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
         criteria.setPowerRequirement(Criteria.POWER_HIGH);
         String bestProvider = locationManager.getBestProvider(criteria, false);
-        Location location = locationManager.getLastKnownLocation(bestProvider);
-        if (location == null || ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) / 1000000) >= 900000) {   // 15 minutes
+        final Location location = locationManager.getLastKnownLocation(bestProvider);
+
+        if (location == null){ /** || ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) / 1000000) >= 900000) {   // 15 minutes
             locationManager.requestSingleUpdate(bestProvider, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
@@ -125,9 +131,59 @@ public class DataLoader {
                 public void onProviderDisabled(String provider) {
 
                 }
-            }, Looper.myLooper());
+            }, Looper.myLooper());*/
+
+            LocationInfo locationInfo = new LocationInfo(context, alarmPrototype);
+            locationInfo.getLocation();
+
+
         } else {
             alarmPrototype.onLocationTaskCompleted(context, location);
+        }
+    }
+
+    protected class LocationInfo implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+
+        private Context context;
+        private AlarmPrototype alarmPrototype;
+        private GoogleApiClient mGoogleApiClient;
+
+        public LocationInfo(Context context, AlarmPrototype alarmPrototype) {
+            this.context = context;
+            this.alarmPrototype = alarmPrototype;
+        }
+
+        public void getLocation() {
+            Log.i("LocationInfo", "I am trying to get location from google api");
+            mGoogleApiClient = new GoogleApiClient.Builder(context)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+            mGoogleApiClient.connect();
+        }
+
+        @Override
+        public void onConnected(Bundle connectionHint){
+            Log.i("LocationInfo", "I received a callback from the api");
+            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+            if(location == null){
+                Log.e("LocationInfo", "There is still no location info from google api");
+                return;
+            }
+            alarmPrototype.onLocationTaskCompleted(context, location);
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+
+        }
+
+        @Override
+        public void onConnectionFailed(ConnectionResult connectionResult) {
+
         }
     }
 
