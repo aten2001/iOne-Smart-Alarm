@@ -61,6 +61,24 @@ public class DataLoader {
         return time;
     }
 
+    public String getFirstScheduleDescription(Context context) {
+        Time t = new Time();
+        t.setToNow();
+        String dtStart = Long.toString(t.toMillis(false));
+        t.set(59, 59, 23, t.monthDay, t.month, t.year);
+        String dtEnd = Long.toString(t.toMillis(false));
+
+        String selection = "((" + Events.DTSTART + " >= ?) AND (" + Events.DTEND + " <= ?))";
+        String[] selectionArgs = new String[]{dtStart, dtEnd};
+
+        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, null);
+        mCursor.moveToFirst();
+
+        String location = mCursor.getCount() == 0 ? null : (mCursor.getString(0) + " @ " + mCursor.getString(3));
+        mCursor.close();
+        return location;
+    }
+
     public String getFirstScheduleLocation(Context context) {
         Time t = new Time();
         t.setToNow();

@@ -6,12 +6,14 @@ import android.location.Location;
 public interface AlarmPrototype {
 
     public enum Weather {
-        THUNDERSTORM(200), DRIZZLE(300), RAIN(500), SNOW(600), ATMOSPHERE(700), CLEAR(800), CLOUDS(801), EXTREME(900), OTHER(950);
+        THUNDERSTORM(200, 900), DRIZZLE(300, 300), RAIN(500, 600), SNOW(600, 900), ATMOSPHERE(700, 300), CLEAR(800, 0), CLOUDS(801, 0), EXTREME(900, 1800), OTHER(950, 0);
 
         private final int code;
+        public final int weight;
 
-        private Weather(int code) {
+        private Weather(int code, int weight) {
             this.code = code;
+            this.weight = weight;
         }
 
         public static Weather getWeather(int code) {
@@ -36,8 +38,9 @@ public interface AlarmPrototype {
     }
 
     public void wakeupProcedure(Context context);
-    public int calculateAlarmTime(Context context);
+    public void calculateAlarmTime(Context context);
     public void onLocationTaskCompleted(Context context, Location location);
     public void onMapTaskCompleted(int duration);
     public void onWeatherTaskCompleted(int temperature, int code);
+    public void onAllTasksCompleted();
 }
