@@ -25,8 +25,8 @@ public class AlarmSetReceiver extends BroadcastReceiver {
         }
         // Set a new alarm through wakeup
         Intent newActivity = new Intent(context, WakeupAlarm.class);
-        newActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //Tell it that it is first time
         newActivity.putExtra("isFirstAlarmSet", true);
-        context.startActivity(newActivity);
+        context.startService(newActivity);
     }
 }

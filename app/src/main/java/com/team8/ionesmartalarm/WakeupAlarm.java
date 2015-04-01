@@ -1,42 +1,35 @@
 package com.team8.ionesmartalarm;
 
-import android.app.Activity;
+import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Bundle;
-import android.os.PowerManager;
 import android.text.format.Time;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
 
-public class WakeupAlarm extends Activity implements AlarmPrototype  {
+public class WakeupAlarm extends IntentService implements AlarmPrototype  {
 
-    private int firstScheduleTime, duration;
-    private double temperature;
-    private Weather weather;
+    private int firstScheduleTime, duration = -1;
+    private double temperature = -1;
+    private Weather weather = null;
     private boolean isFirstSet;
     private final Long repeatingAlarmCheck = 600000l;
     private final Long earlyCheckDiff = 1800000l;
 
     public WakeupAlarm() {
+        super("WakeupAlarm");
+
         this.firstScheduleTime = this.duration = -1;
         this.temperature = -1;
         this.weather = null;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstance){
-        super.onCreate(savedInstance);
-
-        Bundle extras = getIntent().getExtras();
-        isFirstSet = false;
-        if(extras != null){
-            isFirstSet = extras.getBoolean("isFirstAlarmSet", false);
-        }
-        // Start Calculating the alarm time
-        calculateAlarmTime(this.getApplicationContext());
+    protected void onHandleIntent(Intent intent){
+        Log.d("WakeupAlarm", "The intent service was called");
+        isFirstSet = intent.getBooleanExtra("isFirstAlarmSet", false);
+        calculateAlarmTime(WakeupAlarm.this);
     }
 
     public void wakeupProcedure(Context context) {
@@ -103,8 +96,7 @@ public class WakeupAlarm extends Activity implements AlarmPrototype  {
             if (MainActivity.smartAlarm == null) {
                 MainActivity.smartAlarm = new SmartAlarmManager(this);
             }
-            MainActivity.smartAlarm.setGetupAlarm(this, nextWakeTime);
-            this.finish();
+            MainActivity.smartAlarm.setWakeupAlarm(this, nextWakeTime);
         }
     }
 }

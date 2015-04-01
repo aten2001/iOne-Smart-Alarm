@@ -15,8 +15,7 @@ public class WakeupAlarmReceiver extends BroadcastReceiver {
         Log.i("WakeupAlarmReceiver", "The wakeup alarm is called");
 
         // Set a new alarm through wakeup
-        Intent newActivity = new Intent(context, WakeupAlarm.class);
-        newActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(newActivity);
+        Intent newService = new Intent(context, WakeupAlarm.class);
+        context.startService(newService);
     }
 }

@@ -5,4 +5,5 @@
     <string name="action_settings">Settings</string>
     <string name="app_preferences">appData</string>
     <string name="title_activity_snooze_screen">SnoozeScreen</string>
+    <string name="title_activity_final_alarm_screen">FinalAlarmScreen</string>
 </resources>

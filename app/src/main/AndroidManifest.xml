@@ -27,11 +27,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".WakeupAlarm"
-            android:label="iOne Smart Alarm"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-        </activity>
+
+        <service android:name=".WakeupAlarm" />
+        <service android:name=".GetupAlarm" />
 
         <receiver
             android:name=".BootReceiver"
@@ -55,6 +53,10 @@
         <activity
             android:name=".SnoozeScreen"
             android:label="@string/title_activity_snooze_screen" >
+        </activity>
+        <activity
+            android:name=".FinalAlarmScreen"
+            android:label="@string/title_activity_final_alarm_screen" >
         </activity>
     </application>
 
