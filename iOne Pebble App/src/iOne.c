@@ -1,5 +1,4 @@
 #include <pebble.h>
-#include "morpheuz.h"
 #include "iOne.h"
 
 static Window *window;
@@ -8,21 +7,14 @@ static TextLayer *time_layer;
 static TextLayer *date_layer;
 static uint16_t biggest_movement = 0;
 static uint16_t shake_cnt = 0;
-static bool wake_up_bool = false;
-static bool get_up_bool = false;
-
-/************************************************************************************/
-/************************************************************************************/
-/************************************************************************************/
-/*  LAST ITEM --- TURN ALARM BACK ON IF WAKEUP AND BIGGEST UNDER SOME THRESHOLD FOR SOME PERIOD TIME (5 MINUTES)?*/
-/************************************************************************************/
-/************************************************************************************/
-/************************************************************************************/
+uint8_t wake_up_val = 0;
+uint8_t get_up_val = 0;
+uint8_t alarm_on_val = 0;   
 
 /*********************************
  * Send Alarm On/Off Message     *
  *********************************/
-static void alarm_message(uint8_t alarm_set) {
+static void alarm_message(uint8_t alarm_set){
   // Begin dictionary
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
@@ -33,7 +25,6 @@ static void alarm_message(uint8_t alarm_set) {
   // Send the message!
   app_message_outbox_send();
 }
-
 
 /*********************************
  * Sound gradual alarm           *
@@ -49,6 +40,7 @@ static AppTimer *alarm_timer;
 
 static void gradual_alarm(void *data) {
   alarm_message((uint8_t) 1);
+  alarm_on_val = 1;
 
   // Already hit the limit
   if (alarm_count >= ALARM_LIMIT) {
@@ -64,11 +56,13 @@ static void gradual_alarm(void *data) {
   if (biggest_movement > SHAKE_THRESHOLD)
     biggest_movement = 0;
   
-  if (shake_cnt < NUM_SHAKES_TO_TURNOFF)
+  if (shake_cnt < NUM_SHAKES_TO_TURNOFF && wake_up_val == 1)
     // Prepare the time for the next buzz (this gives progressing and phasing)
     alarm_timer = app_timer_register(((uint16_t) alarm_pattern[alarm_count % (ARRAY_LENGTH(alarm_pattern))]) * 1000, gradual_alarm, NULL);
   else
-    alarm_message((uint8_t) 0);
+    biggest_movement = 0;
+    alarm_message((uint8_t) 0); 
+    alarm_on_val = 0;
 
   alarm_count++;
   
@@ -79,6 +73,8 @@ static void gradual_alarm(void *data) {
  *********************************/
 static void getup_alarm(void *data) {
   alarm_message((uint8_t) 1);
+  alarm_on_val = 1;
+
   //Create an array of ON-OFF-ON etc durations in milliseconds
   uint32_t getup_segments[] = {850};
 
@@ -94,11 +90,14 @@ static void getup_alarm(void *data) {
   if (biggest_movement > SHAKE_THRESHOLD)
     biggest_movement = 0;
     
-  if (shake_cnt < NUM_SHAKES_TO_TURNOFF)
+  if (shake_cnt < NUM_SHAKES_TO_TURNOFF && get_up_val == 1)
     // Prepare the time for the next buzz (this gives progressing and phasing)
     alarm_timer = app_timer_register(1000, getup_alarm, NULL);
   else
+    biggest_movement = 0;
     alarm_message((uint8_t) 0);
+    alarm_on_val = 0;
+    
 }
 
 /*****************************************
@@ -135,8 +134,7 @@ static void accel_data_handler(AccelData *data, uint32_t num_samples) {
   uint32_t avg_z = 0;
   AccelData *dx = data;
   for (uint32_t i = 0; i < num_samples; i++, dx++) {
-    // If vibe went off then discount everything - we're only loosing a 2.5 second set of samples, better than an
-    // unwanted spike
+    // If vibe went off then discount everything
     if (dx->did_vibrate) {
       return;
     }
@@ -171,15 +169,7 @@ static void accel_data_handler(AccelData *data, uint32_t num_samples) {
   // Compose string of all data
   snprintf(s_buffer, sizeof(s_buffer), 
     "X: %lu\nY: %lu\nZ: %lu\nBiggest: %lu\nShakes: %lu", 
-    (unsigned long)avg_x, (unsigned long)avg_y, (unsigned long)avg_z, (unsigned long)biggest, (unsigned long)shake_cnt
-  );
-/************************************************************************************/
-/************************************************************************************/
-  /************************************************************************************/
-/*  SO HERE YOU SHOULD SEND INFO TO SOME WHERE? IDEA IS TO HAVE THE TICK EVENT HANDLER CHECK THE BIGGEST VARIABLE AND DETERMINE IF MOVEMENT. EXAMINE STORE MOVEMENT*/
-/************************************************************************************/
-/************************************************************************************/
-/************************************************************************************/
+    (unsigned long)avg_x, (unsigned long)avg_y, (unsigned long)avg_z, (unsigned long)biggest, (unsigned long)shake_cnt);
 
   //Show the data
   text_layer_set_text(text_layer, s_buffer);
@@ -220,6 +210,13 @@ static void update_time() {
  *********************************/
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
     update_time();
+    
+    //checks for movement and triggers alarm if no movement after so many minutes
+    if(tick_time->tm_min%MINUTES_NO_MOVEMENT==0 && get_up_val==1 && alarm_on_val==0) {
+      if (biggest_movement < MOVEMENT_THRESHOLD)
+        getup_alarm(NULL);
+      biggest_movement = 0;
+    }
 }
 
 /*********************************
@@ -228,27 +225,30 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Read first item
   Tuple *t = dict_read_first(iterator);
+  static char s_buffer[128];
 
   // For all items
   while(t != NULL) {
     // Which key was received?
     switch(t->key) {
       case WAKE_UP:
-        wake_up_bool = t->value->uint8;
-        if (wake_up_bool == 1){
+        wake_up_val = t->value->uint8;
+        if (wake_up_val == 1){
           biggest_movement = 0;
           shake_cnt = 0;
           gradual_alarm(NULL);
         }
         break;
       case GET_UP:
-        get_up_bool = t->value->uint8;
-        if (get_up_bool == 1){
+        get_up_val = t->value->uint8;
+        if (get_up_val == 1){
           biggest_movement = 0;
           shake_cnt = 0;
           getup_alarm(NULL);
         }
         break;
+      case CALENDAR:
+        snprintf(s_buffer, sizeof(s_buffer), "Calendar Event: %s", t->value->cstring);
       case ALARM_ON:
         break;
       default:
@@ -300,7 +300,6 @@ static void click_config_provider(void *context) {
 }
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
-//   GRect bounds = layer_get_bounds(window_layer);
 
   //Might as well show time to be more useful
   time_layer = text_layer_create(GRect(0, 90, 144, 20));
@@ -319,7 +318,6 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
     
   // Currently showing accelorometer data
-//   text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 20 } });
   text_layer = text_layer_create(GRect(5, 5, 139, 75));
   text_layer_set_text(text_layer, "Press a button");
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
