@@ -14,7 +14,7 @@ import java.util.Calendar;
  *
  * Manages the set-alarm listener.
  */
-public class smartAlarmManager {
+public class SmartAlarmManager {
 
     // The time of day (in hours) that the alarm should trigger an alarm set procedure
     private static final int SET_ALARM_TIME = 20;
@@ -30,7 +30,7 @@ public class smartAlarmManager {
     private PendingIntent getupPending;
     private SharedPreferences appState;
 
-    public smartAlarmManager(Context contxt){
+    public SmartAlarmManager(Context contxt){
         this.context = contxt;
         // Set the intent
         this.intent = new Intent(context, AlarmSetReceiver.class);

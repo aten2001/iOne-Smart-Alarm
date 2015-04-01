@@ -21,7 +21,7 @@ public class AlarmSetReceiver extends BroadcastReceiver {
         Log.i("AlarmSetReceiver", "The alarm receiver has been called.");
         // Set the tentative time that the alarm is going to be
         if(MainActivity.smartAlarm == null){
-            MainActivity.smartAlarm = new smartAlarmManager(context);
+            MainActivity.smartAlarm = new SmartAlarmManager(context);
         }
         // Set a new alarm
         MainActivity.smartAlarm.setGetupAlarm(context, 01, 19);

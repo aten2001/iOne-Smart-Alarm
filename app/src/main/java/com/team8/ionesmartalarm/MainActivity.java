@@ -1,9 +1,7 @@
 package com.team8.ionesmartalarm;
 
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -16,7 +14,7 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity {
 
-    public static smartAlarmManager smartAlarm;
+    public static SmartAlarmManager smartAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +22,7 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         if(smartAlarm == null){
-            smartAlarm = new smartAlarmManager(MainActivity.this);
+            smartAlarm = new SmartAlarmManager(MainActivity.this);
             if(smartAlarm.isActive()) {
                 smartAlarm.setAlarm();
                 smartAlarm.setGetupAlarm(this, 05, 27);
