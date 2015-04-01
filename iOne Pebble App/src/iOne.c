@@ -251,6 +251,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         snprintf(s_buffer, sizeof(s_buffer), "First Event: %s", t->value->cstring);
         //Show the data
         text_layer_set_text(text_layer, s_buffer);
+        break;
       case ALARM_ON:
         break;
       default:
