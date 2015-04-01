@@ -22,7 +22,7 @@ static bool get_up_bool = false;
 /*********************************
  * Send Alarm On/Off Message     *
  *********************************/
-/*static void alarm_message(uint8 alarm_set){
+static void alarm_message(uint8_t alarm_set) {
   // Begin dictionary
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
@@ -32,7 +32,7 @@ static bool get_up_bool = false;
 
   // Send the message!
   app_message_outbox_send();
-}*/
+}
 
 
 /*********************************
@@ -48,9 +48,7 @@ static AppTimer *alarm_timer;
 #define ALARM_LIMIT (ARRAY_LENGTH(alarm_pattern) * ALARM_PATTERN_MAX_REPEAT)
 
 static void gradual_alarm(void *data) {
-/*
-  alarm_message((unit8) 1)
-*/
+  alarm_message((uint8_t) 1);
 
   // Already hit the limit
   if (alarm_count >= ALARM_LIMIT) {
@@ -69,8 +67,8 @@ static void gradual_alarm(void *data) {
   if (shake_cnt < NUM_SHAKES_TO_TURNOFF)
     // Prepare the time for the next buzz (this gives progressing and phasing)
     alarm_timer = app_timer_register(((uint16_t) alarm_pattern[alarm_count % (ARRAY_LENGTH(alarm_pattern))]) * 1000, gradual_alarm, NULL);
-//   else
-//     alarm_message((unit8) 0)  
+  else
+    alarm_message((uint8_t) 0);
 
   alarm_count++;
   
@@ -80,9 +78,7 @@ static void gradual_alarm(void *data) {
  *   Sound getup alarm           *
  *********************************/
 static void getup_alarm(void *data) {
-/*
-  alarm_message((unit8) 1)
-*/
+  alarm_message((uint8_t) 1);
   //Create an array of ON-OFF-ON etc durations in milliseconds
   uint32_t getup_segments[] = {850};
 
@@ -101,8 +97,8 @@ static void getup_alarm(void *data) {
   if (shake_cnt < NUM_SHAKES_TO_TURNOFF)
     // Prepare the time for the next buzz (this gives progressing and phasing)
     alarm_timer = app_timer_register(1000, getup_alarm, NULL);
-//   else
-//     alarm_message((unit8) 0)
+  else
+    alarm_message((uint8_t) 0);
 }
 
 /*****************************************

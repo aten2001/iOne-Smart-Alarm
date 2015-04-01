@@ -1,7 +1,7 @@
 #ifndef IONE_H_
 #define IONE_H_
 
-#define SHAKE_THRESHOLD 2500
+#define SHAKE_THRESHOLD 3000
 #define MOVEMENT_THRESHOLD 500
 #define STILL_THRESHOLD 250
 
