@@ -23,6 +23,7 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
     private double temperature = -1;
     private Weather weather = null;
     private String weatherDescription = null;
+    private boolean noSchedule = true;
     private boolean isFirstSet;
     private final Long repeatingAlarmCheck = 600000l;
     private final Long earlyCheckDiff = 1800000l;
@@ -34,6 +35,7 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
         this.temperature = -1;
         this.weather = null;
         this.weatherDescription = null;
+        this.noSchedule = true;
     }
 
     protected void onHandleIntent(Intent intent){
@@ -63,7 +65,11 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
             time.setToNow();
             time.set(0, 0, 8, time.monthDay, time.month, time.year);
             firstScheduleTime = (int) (time.toMillis(false) / 1000);
-        } else firstScheduleTime = (int) (firstTime / 1000);
+            noSchedule = true;
+        } else {
+            firstScheduleTime = (int) (firstTime / 1000);
+            noSchedule = false;
+        }
         dataLoader.getLastLocation(context, this);
     }
 
@@ -75,7 +81,8 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
 
         Log.d("WakeupAlarm", "latitude: " + location.getLatitude() + ", longitude: " + location.getLongitude()); // TEST
         DataLoader dataLoader = new DataLoader();
-        dataLoader.getTrafficTime(context, location, this);
+        if (noSchedule) duration = 0;
+        else dataLoader.getTrafficTime(context, location, this);
         Time time = new Time();
         time.setToNow();
         dataLoader.getWeather(location, time.toMillis(false), this);
