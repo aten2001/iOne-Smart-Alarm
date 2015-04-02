@@ -367,6 +367,7 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+  window_single_click_subscribe(BUTTON_ID_BACK, select_click_handler);
 }
 
 /*********************************************************************/
@@ -396,7 +397,7 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
 
   //Add weather as well
-  weather_layer = text_layer_create(GRect(0, 68, 144, 25));
+  weather_layer = text_layer_create(GRect(0, 70, 144, 25));
   text_layer_set_text(weather_layer, "Loading Weather...");
   text_layer_set_background_color(weather_layer, GColorBlack);
   text_layer_set_text_color(weather_layer, GColorWhite);
@@ -405,7 +406,7 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(weather_layer));
 
   //Add event as well
-  event_layer = text_layer_create(GRect(0, 90, 144, 25));
+  event_layer = text_layer_create(GRect(0, 92, 144, 25));
   text_layer_set_text(event_layer, "Loading Event...");
   text_layer_set_background_color(event_layer, GColorBlack);
   text_layer_set_text_color(event_layer, GColorWhite);
