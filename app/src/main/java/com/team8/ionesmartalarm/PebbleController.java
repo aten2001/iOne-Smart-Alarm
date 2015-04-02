@@ -26,8 +26,6 @@ public class PebbleController {
             }
         };
         PebbleKit.registerReceivedDataHandler(context, alarmDataReceiver);
-
-        //This is a fake comment
     }
 
     public void stopReceivingDataFromWatch(Context context) {

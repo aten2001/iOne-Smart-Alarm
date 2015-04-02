@@ -37,8 +37,11 @@ public class SnoozeScreen extends ActionBarActivity {
 
         // Get data from the data loader
         DataLoader info = new DataLoader();
+        Object[] calInfo = info.getFirstScheduleInformation(this);
         TextView eventDescription = (TextView) this.findViewById(R.id.eventDescription);
-        eventDescription.setText(info.getFirstScheduleDescription(this));
+        TextView eventTitle = (TextView) this.findViewById(R.id.eventTitle);
+        eventTitle.setText((String)calInfo[0]);
+        eventDescription.setText((String)calInfo[4]);
 
         Bundle passedData = this.getIntent().getExtras();
         String weather = passedData.getString("weatherInfo", "Thunderstorm");
@@ -52,8 +55,12 @@ public class SnoozeScreen extends ActionBarActivity {
     private void startPebbleWakeup(String weather, Double temp, String eventDescription){
         pebble.beginReceivingDataFromWatch(this);
         pebble.startAlarmApp(this);
+        //Send the relevant info
+        //pebble.sendWeatherInfoToWatch(this, temp.intValue(), weather);
+        //pebble.sendCalendarInfoToWatch(this, eventDescription);
         pebble.turnOnAlarm(this, true);
-        Log.d("SnoozeAlarm", "Event descr: " + eventDescription);
+        pebble.sendWeatherInfoToWatch(this, temp.intValue(), weather);
+        pebble.sendCalendarInfoToWatch(this, eventDescription);
     }
 
 
@@ -80,8 +87,6 @@ public class SnoozeScreen extends ActionBarActivity {
     }
 
     public void snooze(View view){
-        pebble.turnOffAlarm(this, true);
-        pebble.stopReceivingDataFromWatch(this);
         this.finish();
     }
 
@@ -89,6 +94,8 @@ public class SnoozeScreen extends ActionBarActivity {
     public void onDestroy(){
         super.onDestroy();
 
+        pebble.turnOffAlarm(this, true);
+        pebble.stopReceivingDataFromWatch(this);
         wakeLock.release();
     }
 }
