@@ -12,7 +12,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-
+/**
+ * @author Team 8
+ *
+ *
+ */
 public class FinalAlarmScreen extends ActionBarActivity {
 
     private  PowerManager.WakeLock wakeLock;

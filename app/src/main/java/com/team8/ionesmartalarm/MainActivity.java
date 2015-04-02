@@ -12,7 +12,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ToggleButton;
 
-
+/**
+ * @author Team 8
+ *
+ * MainActivity of the app
+ */
 public class MainActivity extends ActionBarActivity {
 
     public static SmartAlarmManager smartAlarm;

@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * @author Clayton
+ * @author Team 8
  *
  * Listens for phone reboot and re-enables the set alarm listener (AlarmSetReceiver).
  */

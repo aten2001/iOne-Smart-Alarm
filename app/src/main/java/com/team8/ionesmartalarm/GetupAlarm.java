@@ -1,20 +1,20 @@
 package com.team8.ionesmartalarm;
 
-import android.app.Activity;
 import android.app.IntentService;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Bundle;
-import android.os.PowerManager;
-import android.support.v4.app.NotificationCompat;
 import android.text.format.Time;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 
+/**
+ * @author Team 8
+ *
+ * GetupAlarm class to calculate and handle getup alarms
+ */
 public class GetupAlarm extends IntentService implements AlarmPrototype {
 
     private int firstScheduleTime, duration;

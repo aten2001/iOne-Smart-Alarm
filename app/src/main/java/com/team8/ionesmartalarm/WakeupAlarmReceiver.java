@@ -6,6 +6,11 @@ import android.content.Intent;
 import android.text.format.Time;
 import android.util.Log;
 
+/**
+ * @author Team 8
+ *
+ *
+ */
 public class WakeupAlarmReceiver extends BroadcastReceiver {
     public WakeupAlarmReceiver() {
     }
