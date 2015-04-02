@@ -1,9 +1,11 @@
 package com.team8.ionesmartalarm;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.support.v4.app.NotificationCompat;
 import android.text.format.Time;
 import android.util.Log;
 import android.widget.Toast;
@@ -118,6 +120,14 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
             Long nextWakeTime;
             if(isFirstSet) {
                 nextWakeTime = time - earlyCheckDiff;
+
+                //Send a notification
+                NotificationCompat.Builder notification = new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_plusone_small_off_client)
+                        .setContentTitle("Next Wakeup Alarm")
+                        .setContentText("The wakeup alarm will go off: " + sdf.format(time * 1000));
+                NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(1941, notification.build());
             }
             else{
                 Long nextCycleWake = System.currentTimeMillis() + repeatingAlarmCheck;
@@ -129,6 +139,11 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
                 MainActivity.smartAlarm = new SmartAlarmManager(this);
             }
             MainActivity.smartAlarm.setWakeupAlarm(this, nextWakeTime);
+
+            //Send the wakeup time to the pebble
+            PebbleController pebble = new PebbleController();
+            pebble.startAlarmApp(this);
+            pebble.sendAlarmInfoToWatch(this, time*1000, time*1000);
         }
     }
 }

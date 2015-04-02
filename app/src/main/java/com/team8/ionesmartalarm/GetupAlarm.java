@@ -2,11 +2,13 @@ package com.team8.ionesmartalarm;
 
 import android.app.Activity;
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.support.v4.app.NotificationCompat;
 import android.text.format.Time;
 import android.util.Log;
 import android.widget.Toast;
@@ -39,8 +41,13 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
     }
 
     public void wakeupProcedure(Context context) {
+        DataLoader info = new DataLoader();
         Log.i("GetupAlarm", "Getup alarm has triggered.");
         Intent newActivity = new Intent(this, FinalAlarmScreen.class);
+        newActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        newActivity.putExtra("weatherInfo", this.weatherDescription);
+        newActivity.putExtra("tempInfo", this.temperature);
+        newActivity.putExtra("eventDescr", info.getFirstScheduleDescription(this));
         newActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         this.startActivity(newActivity);
     }
@@ -128,6 +135,11 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
                 MainActivity.smartAlarm = new SmartAlarmManager(this);
             }
             MainActivity.smartAlarm.setGetupAlarm(this, nextWakeTime);
+
+            //Send the wakeup time to the pebble
+            PebbleController pebble = new PebbleController();
+            pebble.startAlarmApp(this);
+            pebble.sendAlarmInfoToWatch(this, time*1000, time*1000);
         }
     }
 }

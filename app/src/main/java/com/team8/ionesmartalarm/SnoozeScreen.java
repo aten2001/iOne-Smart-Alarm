@@ -45,7 +45,7 @@ public class SnoozeScreen extends ActionBarActivity {
 
         Bundle passedData = this.getIntent().getExtras();
         String weather = passedData.getString("weatherInfo", "Thunderstorm");
-        Double temp = passedData.getDouble("weatherInfo", 20);
+        Double temp = passedData.getDouble("tempInfo", 20);
         String eventDescr = passedData.getString("eventDescr", "No Events");
         //Start the pebble procedure
         pebble = new PebbleController();
@@ -55,14 +55,9 @@ public class SnoozeScreen extends ActionBarActivity {
     private void startPebbleWakeup(String weather, Double temp, String eventDescription){
         pebble.beginReceivingDataFromWatch(this);
         pebble.startAlarmApp(this);
-        //Send the relevant info
-        //pebble.sendWeatherInfoToWatch(this, temp.intValue(), weather);
-        //pebble.sendCalendarInfoToWatch(this, eventDescription);
-        pebble.turnOnAlarm(this, true);
-        pebble.sendWeatherInfoToWatch(this, temp.intValue(), weather);
-        pebble.sendCalendarInfoToWatch(this, eventDescription);
+        pebble.turnOnAlarm(this, true, eventDescription, Integer.toString(temp.intValue())+"º, "+weather);
+        Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

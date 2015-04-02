@@ -35,18 +35,22 @@ public class PebbleController {
         }
     }
 
-    public void sendDataToWatch(Context context, int key, byte value) {
+    public void sendDataToWatch(Context context, int key, byte value, String calendarInfo, String tempAndWeather) {
         PebbleDictionary data = new PebbleDictionary();
         data.addUint8(key, value);
+        if(key==1) {
+            data.addString(2, calendarInfo);
+            data.addString(3, tempAndWeather);
+        }
         PebbleKit.sendDataToPebble(context, ALARM_UUID, data);
     }
 
-    public void turnOnAlarm(Context context, boolean gradual) {
-        sendDataToWatch(context, gradual ? 0 : 1, (byte) 1);
+    public void turnOnAlarm(Context context, boolean gradual, String calendarInfo, String tempAndWeather) {
+        sendDataToWatch(context, gradual ? 0 : 1, (byte) 1, calendarInfo, tempAndWeather);
     }
 
     public void turnOffAlarm(Context context, boolean gradual) {
-        sendDataToWatch(context, gradual ? 0 : 1, (byte) 0);
+        sendDataToWatch(context, gradual ? 0 : 1, (byte) 0, "", "");
     }
 
     public void sendCalendarInfoToWatch(Context context, String info) {

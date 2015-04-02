@@ -18,7 +18,7 @@ import java.util.Calendar;
 public class SmartAlarmManager {
 
     // The time of day (in hours) that the alarm should trigger an alarm set procedure
-    private static final int SET_ALARM_TIME = 01;
+    private static final int SET_ALARM_TIME = 00;
     private static final String IS_ACTIVE_DATA = "isSetAlarmActive";
     private static final String IS_ACTIVE_WAKEUP = "isWakeupAlarmActive";
     private static final String IS_ACTIVE_GETUP = "isGetupAlarmActive";

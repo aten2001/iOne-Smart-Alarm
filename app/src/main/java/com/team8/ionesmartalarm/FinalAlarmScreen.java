@@ -37,14 +37,22 @@ public class FinalAlarmScreen extends ActionBarActivity {
         Ringtone ringtone = RingtoneManager.getRingtone(this.getApplicationContext(), alarmSound);
         ringtone.play();
 
+        //Get the info for the pebble
+        Bundle passedData = this.getIntent().getExtras();
+        String weather = passedData.getString("weatherInfo", "Thunderstorm");
+        Double temp = passedData.getDouble("tempInfo", 20);
+        String eventDescr = passedData.getString("eventDescr", "No Events");
+
         pebble = new PebbleController();
-        startPebbleGetup();
+        startPebbleGetup(weather, temp, eventDescr);
     }
 
-    private void startPebbleGetup(){
-        pebble.startAlarmApp(this);
+
+    private void startPebbleGetup(String weather, Double temp, String eventDescription){
         pebble.beginReceivingDataFromWatch(this);
-        pebble.turnOnAlarm(this, false);
+        pebble.startAlarmApp(this);
+        pebble.turnOnAlarm(this, false, eventDescription, Integer.toString(temp.intValue())+"º, "+weather);
+        Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
     }
 
     @Override
@@ -71,8 +79,8 @@ public class FinalAlarmScreen extends ActionBarActivity {
 
     public void onDestroy(){
         super.onDestroy();
-        //destroy things
-        //here is more
+
+        pebble.turnOffAlarm(this, false);
         pebble.stopReceivingDataFromWatch(this);
         wakeLock.release();
     }
