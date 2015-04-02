@@ -5,6 +5,8 @@ static Window *window;
 static TextLayer *text_layer;
 static TextLayer *time_layer;
 static TextLayer *date_layer;
+static TextLayer *event_layer;
+static TextLayer *weather_layer;
 static uint16_t biggest_movement = 0;
 static uint16_t shake_cnt = 0;
 uint8_t wake_up_val = 0;
@@ -48,10 +50,12 @@ static void gradual_alarm(void *data) {
   }
 
   // Vibrate
-  if (alarm_count < 10)
-    vibes_short_pulse();
-  else
-    vibes_long_pulse();
+  if (biggest_movement > MOVEMENT_THRESHOLD){
+    if (alarm_count < 10)
+      vibes_short_pulse();
+    else
+      vibes_long_pulse();
+  }
 
   if (biggest_movement > SHAKE_THRESHOLD)
     biggest_movement = 0;
@@ -167,12 +171,13 @@ static void accel_data_handler(AccelData *data, uint32_t num_samples) {
     shake_cnt += 1;
     
   // Compose string of all data
-  snprintf(s_buffer, sizeof(s_buffer), 
-    "X: %lu\nY: %lu\nZ: %lu\nBiggest: %lu\nShakes: %lu", 
-    (unsigned long)avg_x, (unsigned long)avg_y, (unsigned long)avg_z, (unsigned long)biggest, (unsigned long)shake_cnt);
+//   snprintf(s_buffer, sizeof(s_buffer), 
+//     "X: %lu\nY: %lu\nZ: %lu\nBiggest: %lu\nShakes: %lu", 
+//     (unsigned long)avg_x, (unsigned long)avg_y, (unsigned long)avg_z, (unsigned long)biggest, (unsigned long)shake_cnt);
 
-  //Show the data
-  text_layer_set_text(text_layer, s_buffer);
+  if (get_up_val == 1 || wake_up_val == 1) 
+    //Show the data
+    text_layer_set_text(text_layer, s_buffer);
 }
 
 /*********************************
@@ -185,7 +190,7 @@ static void update_time() {
 
   // Create a long-lived buffer
   static char buffer[] = "00:00";
-  static char date_buffer[20];
+  static char date_buffer[90];
 
 
   // Write the current hours and minutes into the buffer
@@ -248,8 +253,16 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         }
         break;
       case CALENDAR:
-        snprintf(s_buffer, sizeof(s_buffer), "First Event: %s", t->value->cstring);
+        snprintf(s_buffer, sizeof(s_buffer), "Event: %s", t->value->cstring);
         //Show the data
+        text_layer_set_text(event_layer, s_buffer);
+        break;
+      case WEATHER:
+        snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
+        text_layer_set_text(weather_layer, s_buffer);
+        break;
+      case ALARM_SET_TIME:
+        snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
         text_layer_set_text(text_layer, s_buffer);
         break;
       case ALARM_ON:
@@ -305,24 +318,45 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
 
   //Might as well show time to be more useful
-  time_layer = text_layer_create(GRect(0, 90, 144, 20));
-  text_layer_set_background_color(time_layer, GColorBlack);
-  text_layer_set_text_color(time_layer, GColorWhite);
-//   text_layer_set_text(time_layer, "00:00");
+  time_layer = text_layer_create(GRect(0, 5, 144, 35));
+  text_layer_set_text(time_layer, "00:00");
+  text_layer_set_text_color(time_layer, GColorBlack);
+  text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK));
   text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
   
   //Add date as well
-  date_layer = text_layer_create(GRect(0, 115, 144, 20));
-  text_layer_set_background_color(date_layer, GColorBlack);
-  text_layer_set_text_color(date_layer, GColorWhite);
+  date_layer = text_layer_create(GRect(0, 35, 144, 40));
+  text_layer_set_text(date_layer, "Loading Date...");
+  text_layer_set_text_color(date_layer, GColorBlack);
+  text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
   text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
+
+  //Add weather as well
+  weather_layer = text_layer_create(GRect(0, 63, 144, 25));
+  text_layer_set_text(weather_layer, "Loading Weather...");
+  text_layer_set_background_color(weather_layer, GColorBlack);
+  text_layer_set_text_color(weather_layer, GColorWhite);
+  text_layer_set_font(weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_text_alignment(weather_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(weather_layer));
+
+  //Add event as well
+  event_layer = text_layer_create(GRect(0, 85, 144, 25));
+  text_layer_set_text(event_layer, "Loading Event...");
+  text_layer_set_background_color(event_layer, GColorBlack);
+  text_layer_set_text_color(event_layer, GColorWhite);
+  text_layer_set_font(event_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_text_alignment(event_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(event_layer));
+
     
-  // Currently showing accelorometer data
-  text_layer = text_layer_create(GRect(5, 5, 139, 75));
-  text_layer_set_text(text_layer, "Press a button");
+  // Show varying information here
+  text_layer = text_layer_create(GRect(0, 115, 144, 30));
+  text_layer_set_text(text_layer, "Setting Alarm...");
+  text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
   

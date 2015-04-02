@@ -12,7 +12,10 @@
 #define WAKE_UP 0
 #define GET_UP 1
 #define CALENDAR 2
-#define ALARM_ON 3
+#define WEATHER 3
+#define ALARM_SET_TIME 4
+#define ALARM_ON 5
+
 
 
 
