@@ -40,6 +40,11 @@ static void alarm_message(uint8_t alarm_set){
   dict_write_uint8(iter, ALARM_ON, alarm_set);
 
   // Send the message!
+  if (alarm_set == 1)
+      APP_LOG(APP_LOG_LEVEL_INFO, "Sending 1 (Alarm On)");
+  else 
+      APP_LOG(APP_LOG_LEVEL_INFO, "Sending 0 (Alarm Off)");
+
   app_message_outbox_send();
 }
 
@@ -56,9 +61,6 @@ static AppTimer *alarm_timer;
 #define ALARM_LIMIT (ARRAY_LENGTH(alarm_pattern) * ALARM_PATTERN_MAX_REPEAT)
 
 static void gradual_alarm(void *data) {
-  alarm_message((uint8_t) 1);
-  alarm_on_val = 1;
-
   // Already hit the limit so let them sleep some more
   if (alarm_count >= ALARM_LIMIT) {
     return;
@@ -82,6 +84,7 @@ static void gradual_alarm(void *data) {
     biggest_movement = 0;
     alarm_message((uint8_t) 0); 
     alarm_on_val = 0;
+    wake_up_val = 0;
   }
   alarm_count++;
   
@@ -91,9 +94,6 @@ static void gradual_alarm(void *data) {
  *   Sound getup alarm           *
  *********************************/
 static void getup_alarm(void *data) {
-  alarm_message((uint8_t) 1);
-  alarm_on_val = 1;
-
   //Create an array of ON-OFF-ON etc durations in milliseconds
   uint32_t getup_segments[] = {850};
 
@@ -116,6 +116,7 @@ static void getup_alarm(void *data) {
     biggest_movement = 0;
     alarm_message((uint8_t) 0);
     alarm_on_val = 0;
+    get_up_val = 0;
   }
 }
 
@@ -197,8 +198,9 @@ static void accel_data_handler(AccelData *data, uint32_t num_samples) {
   }
   if (SHOW_ALARM){
      if (get_up_val == 1 || wake_up_val == 1){
-        uint32_t countdown = NUM_SHAKES_TO_TURNOFF - shake_cnt;
-        snprintf(s_buffer,sizeof(s_buffer),"Shake To End: %lu",(unsigned long) countdown);
+        int countdown = NUM_SHAKES_TO_TURNOFF - shake_cnt;
+        if (countdown >= 0)
+            snprintf(s_buffer,sizeof(s_buffer),"Shake To End: %lu",(unsigned long) countdown);
      }
      else
         snprintf(s_buffer, sizeof(s_buffer), "%s", alarm_set_message);
@@ -275,6 +277,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
           get_up_val = 0;
           biggest_movement = 0;
           shake_cnt = 0;
+          alarm_message((uint8_t) 1);
+          alarm_on_val = 1;
           gradual_alarm(NULL);
         }
         break;
@@ -285,6 +289,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
           wake_up_val = 0;
           biggest_movement = 0;
           shake_cnt = 0;
+          alarm_message((uint8_t) 1);
+          alarm_on_val = 1;
           getup_alarm(NULL);
         }
         break;
@@ -298,12 +304,12 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Key");
         snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
         text_layer_set_text(weather_layer, s_buffer);
-        alarm_set_message = t->value->cstring;
         break;
       case ALARM_SET_TIME:
         APP_LOG(APP_LOG_LEVEL_INFO, "Received Alarm Set Key");
         snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
         text_layer_set_text(text_layer, s_buffer);
+        alarm_set_message = t->value->cstring;
         break;
       case ALARM_ON:
         APP_LOG(APP_LOG_LEVEL_INFO, "Why the hell you sending me Alarm On Key?");
