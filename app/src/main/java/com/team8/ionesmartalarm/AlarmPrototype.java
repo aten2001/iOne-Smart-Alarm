@@ -99,4 +99,11 @@ public interface AlarmPrototype {
      * Called when every data has been updated and is ready
      */
     public void onAllTasksCompleted();
+
+    /**
+     * Sends a notification to the phone about when the next alarm is set for.
+     *
+     * @param alarmTime The time that the next alarm is set for
+     */
+    public void sendPushNotification(String alarmTime);
 }
