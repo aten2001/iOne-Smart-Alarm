@@ -67,7 +67,7 @@ public class PebbleController {
         PebbleDictionary data = new PebbleDictionary();
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
         data.addString(4, sdf.format(wakeupTime) + " - " + sdf.format(getupTime));
-        PebbleKit.sendDataToPebble(context, ALARM_UUID, data);;
+        PebbleKit.sendDataToPebble(context, ALARM_UUID, data);
     }
 
     public void startAlarmApp(Context context) {
