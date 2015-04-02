@@ -338,7 +338,7 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
 
   //Might as well show time to be more useful
-  time_layer = text_layer_create(GRect(0, 5, 144, 35));
+  time_layer = text_layer_create(GRect(0, 10, 144, 35));
   text_layer_set_text(time_layer, "00:00");
   text_layer_set_text_color(time_layer, GColorBlack);
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK));
@@ -347,7 +347,7 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
   
   //Add date as well
-  date_layer = text_layer_create(GRect(0, 35, 144, 40));
+  date_layer = text_layer_create(GRect(0, 40, 144, 40));
   text_layer_set_text(date_layer, "Loading Date...");
   text_layer_set_text_color(date_layer, GColorBlack);
   text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
@@ -355,7 +355,7 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
 
   //Add weather as well
-  weather_layer = text_layer_create(GRect(0, 63, 144, 25));
+  weather_layer = text_layer_create(GRect(0, 68, 144, 25));
   text_layer_set_text(weather_layer, "Loading Weather...");
   text_layer_set_background_color(weather_layer, GColorBlack);
   text_layer_set_text_color(weather_layer, GColorWhite);
@@ -364,7 +364,7 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(weather_layer));
 
   //Add event as well
-  event_layer = text_layer_create(GRect(0, 85, 144, 25));
+  event_layer = text_layer_create(GRect(0, 90, 144, 25));
   text_layer_set_text(event_layer, "Loading Event...");
   text_layer_set_background_color(event_layer, GColorBlack);
   text_layer_set_text_color(event_layer, GColorWhite);
@@ -374,7 +374,7 @@ static void window_load(Window *window) {
 
     
   // Show varying information here
-  text_layer = text_layer_create(GRect(0, 115, 144, 30));
+  text_layer = text_layer_create(GRect(0, 130, 144, 30));
   alarm_set_message = "Setting Alarm...";
   text_layer_set_text(text_layer, alarm_set_message);
   text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
@@ -391,6 +391,7 @@ static void window_unload(Window *window) {
 
 static void init(void) {
   window = window_create();
+  window_set_fullscreen(window, true);
   window_set_click_config_provider(window, click_config_provider);
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
