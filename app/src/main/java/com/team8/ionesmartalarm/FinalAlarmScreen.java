@@ -20,6 +20,7 @@ import android.view.WindowManager;
 public class FinalAlarmScreen extends ActionBarActivity {
 
     private  PowerManager.WakeLock wakeLock;
+    private PebbleController pebble;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +41,13 @@ public class FinalAlarmScreen extends ActionBarActivity {
         Ringtone ringtone = RingtoneManager.getRingtone(this.getApplicationContext(), alarmSound);
         ringtone.play();
 
+        pebble = new PebbleController();
         startPebbleGetup();
     }
 
     private void startPebbleGetup(){
-        PebbleController pebble = new PebbleController();
         pebble.startAlarmApp(this);
+        pebble.beginReceivingDataFromWatch(this);
         pebble.turnOnAlarm(this, false);
     }
 
@@ -69,5 +71,13 @@ public class FinalAlarmScreen extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onDestroy(){
+        super.onDestroy();
+        //destroy things
+        //here is more
+        pebble.stopReceivingDataFromWatch(this);
+        wakeLock.release();
     }
 }
