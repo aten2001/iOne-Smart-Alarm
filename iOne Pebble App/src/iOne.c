@@ -7,11 +7,15 @@ static TextLayer *time_layer;
 static TextLayer *date_layer;
 static TextLayer *event_layer;
 static TextLayer *weather_layer;
+static char *alarm_set_message;
 static uint16_t biggest_movement = 0;
 static uint16_t shake_cnt = 0;
 uint8_t wake_up_val = 0;
 uint8_t get_up_val = 0;
 uint8_t alarm_on_val = 0;   
+bool SHOW_SHAKE = false;
+bool SHOW_MOVEMENT = false;
+bool SHOW_ALARM = true;
 
 /*********************************
  * Send Alarm On/Off Message     *
@@ -131,7 +135,7 @@ static void do_axis(int16_t val, uint16_t *biggest, uint32_t avg) {
  * Process accelerometer data    *
  *********************************/
 static void accel_data_handler(AccelData *data, uint32_t num_samples) {
-
+//   uint32_t countdown = 0;
   // Average the data
   uint32_t avg_x = 0;
   uint32_t avg_y = 0;
@@ -175,9 +179,22 @@ static void accel_data_handler(AccelData *data, uint32_t num_samples) {
 //     "X: %lu\nY: %lu\nZ: %lu\nBiggest: %lu\nShakes: %lu", 
 //     (unsigned long)avg_x, (unsigned long)avg_y, (unsigned long)avg_z, (unsigned long)biggest, (unsigned long)shake_cnt);
 
-  if (get_up_val == 1 || wake_up_val == 1) 
-    //Show the data
+  if (SHOW_SHAKE)
+      snprintf(s_buffer, sizeof(s_buffer), "Shakes: %lu", (unsigned long)shake_cnt);
+  if (SHOW_MOVEMENT)
+      snprintf(s_buffer, sizeof(s_buffer), "Movement: %lu", (unsigned long)biggest);
+  if (SHOW_SHAKE || SHOW_MOVEMENT){
+      text_layer_set_text(text_layer, s_buffer);
+  }
+  if (SHOW_ALARM){
+     if (get_up_val == 1 || wake_up_val == 1){
+        uint32_t countdown = NUM_SHAKES_TO_TURNOFF - shake_cnt;
+        snprintf(s_buffer,sizeof(s_buffer),"Shake To End: %lu",(unsigned long) countdown);
+     }
+     else
+        snprintf(s_buffer, sizeof(s_buffer), "%s", alarm_set_message);
     text_layer_set_text(text_layer, s_buffer);
+  }
 }
 
 /*********************************
@@ -239,6 +256,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       case WAKE_UP:
         wake_up_val = t->value->uint8;
         if (wake_up_val == 1){
+          get_up_val = 0;
           biggest_movement = 0;
           shake_cnt = 0;
           gradual_alarm(NULL);
@@ -247,6 +265,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       case GET_UP:
         get_up_val = t->value->uint8;
         if (get_up_val == 1){
+          wake_up_val = 0;
           biggest_movement = 0;
           shake_cnt = 0;
           getup_alarm(NULL);
@@ -260,6 +279,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       case WEATHER:
         snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
         text_layer_set_text(weather_layer, s_buffer);
+        alarm_set_message = t->value->cstring;
         break;
       case ALARM_SET_TIME:
         snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
@@ -292,21 +312,21 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
  * Standard Pebble App Setup     *
  *********************************/
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Select");
+  SHOW_SHAKE = false;
+  SHOW_MOVEMENT = false;
+  SHOW_ALARM = true;
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Up");
-  biggest_movement = 0;
-  shake_cnt = 0;
-  gradual_alarm(NULL);
+  SHOW_SHAKE = true;
+  SHOW_MOVEMENT = false;
+  SHOW_ALARM = false;
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Down");
-  biggest_movement = 0;
-  shake_cnt = 0;
-  getup_alarm(NULL);
+  SHOW_SHAKE = false;
+  SHOW_MOVEMENT = true;
+  SHOW_ALARM = false;
 }
 
 static void click_config_provider(void *context) {
@@ -355,7 +375,8 @@ static void window_load(Window *window) {
     
   // Show varying information here
   text_layer = text_layer_create(GRect(0, 115, 144, 30));
-  text_layer_set_text(text_layer, "Setting Alarm...");
+  alarm_set_message = "Setting Alarm...";
+  text_layer_set_text(text_layer, alarm_set_message);
   text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
