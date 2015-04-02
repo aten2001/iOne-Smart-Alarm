@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 
 public class SnoozeScreen extends ActionBarActivity {
@@ -32,6 +33,11 @@ public class SnoozeScreen extends ActionBarActivity {
 
         //get past lock screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
+        // Get data from the data loader
+        DataLoader info = new DataLoader();
+        TextView eventDescription = (TextView) this.findViewById(R.id.eventDescription);
+        eventDescription.setText(info.getFirstScheduleDescription(this));
     }
 
 
