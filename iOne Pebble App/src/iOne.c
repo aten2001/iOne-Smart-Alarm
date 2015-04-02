@@ -1,3 +1,14 @@
+/******************************************************************
+* Author: Malcolm Haynes
+* Date: 4/1/2015
+* 
+* iOne Smart Alarm - 
+* This code controls the Pebble watch app. The app will
+* alarm when it receives a message from Android. It then 
+* detects motion and turns off based on motion. It will turn
+* back on for lack of motion after being turned off.
+*******************************************************************/
+
 #include <pebble.h>
 #include "iOne.h"
 
@@ -17,9 +28,9 @@ bool SHOW_SHAKE = false;
 bool SHOW_MOVEMENT = false;
 bool SHOW_ALARM = true;
 
-/*********************************
- * Send Alarm On/Off Message     *
- *********************************/
+/*************************************************
+ * Send Alarm On/Off Message to Android phone    *
+ *************************************************/
 static void alarm_message(uint8_t alarm_set){
   // Begin dictionary
   DictionaryIterator *iter;
@@ -32,12 +43,12 @@ static void alarm_message(uint8_t alarm_set){
   app_message_outbox_send();
 }
 
-/*********************************
- * Sound gradual alarm           *
- *********************************/
+/****************************************************
+ * Sound gradual alarm. Modified from Morpheuz app
+ *by James Fowler           
+ ****************************************************/
 // Times (in seconds) between each buzz (gives a progressive alarm and gaps between phases)
 static uint8_t alarm_pattern[] = { 5, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-//Create an array of ON-OFF-ON etc durations in milliseconds
 
 static uint8_t alarm_count;
 static AppTimer *alarm_timer;
@@ -48,7 +59,7 @@ static void gradual_alarm(void *data) {
   alarm_message((uint8_t) 1);
   alarm_on_val = 1;
 
-  // Already hit the limit
+  // Already hit the limit so let them sleep some more
   if (alarm_count >= ALARM_LIMIT) {
     return;
   }
@@ -65,13 +76,13 @@ static void gradual_alarm(void *data) {
     biggest_movement = 0;
   
   if (shake_cnt < NUM_SHAKES_TO_TURNOFF && wake_up_val == 1)
-    // Prepare the time for the next buzz (this gives progressing and phasing)
+    // If not turned off, then rinse and repeat
     alarm_timer = app_timer_register(((uint16_t) alarm_pattern[alarm_count % (ARRAY_LENGTH(alarm_pattern))]) * 1000, gradual_alarm, NULL);
-  else
+  else{
     biggest_movement = 0;
     alarm_message((uint8_t) 0); 
     alarm_on_val = 0;
-
+  }
   alarm_count++;
   
 }
@@ -101,11 +112,11 @@ static void getup_alarm(void *data) {
   if (shake_cnt < NUM_SHAKES_TO_TURNOFF && get_up_val == 1)
     // Prepare the time for the next buzz (this gives progressing and phasing)
     alarm_timer = app_timer_register(1000, getup_alarm, NULL);
-  else
+  else{
     biggest_movement = 0;
     alarm_message((uint8_t) 0);
     alarm_on_val = 0;
-    
+  }
 }
 
 /*****************************************
