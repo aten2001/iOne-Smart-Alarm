@@ -5,6 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+/**
+ * @author Team 8
+ *
+ *
+ */
 public class GetupAlarmReceiver extends BroadcastReceiver {
     public GetupAlarmReceiver() {
     }

@@ -10,6 +10,11 @@ import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 
+/**
+ * @author Team 8
+ *
+ * WakeupAlarm class to calculate and handle wakeup alarms
+ */
 public class WakeupAlarm extends IntentService implements AlarmPrototype  {
 
     private int firstScheduleTime, duration = -1;

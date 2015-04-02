@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 /**
- * @author Clayton
+ * @author Team 8
  *
  * Listens for an android alarm to start the process of gathering information neccissary to set the
  * alarm time. The intention is that every day at some time (8pm for example) the application

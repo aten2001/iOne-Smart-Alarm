@@ -12,7 +12,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-
+/**
+ * @author Team 8
+ *
+ *
+ */
 public class SnoozeScreen extends ActionBarActivity {
 
     private PowerManager.WakeLock wakeLock;

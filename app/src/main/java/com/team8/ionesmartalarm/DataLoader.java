@@ -33,7 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**
- * @author Dennis
+ * @author Team 8
  *
  * Fetches and updates various data needed to set alarm times.
  * Uses the local calendar information (first schedule of the day), traffic information, and weather information.
@@ -48,6 +48,12 @@ public class DataLoader {
             Events.DESCRIPTION
     };
 
+    /**
+     * Returns the starting time for the first schedule
+     *
+     * @param context current context
+     * @return time value in long, or null if no schedule was found
+     */
     public long getFirstScheduleTime(Context context) {
         Time t = new Time();
         t.setToNow();
@@ -66,6 +72,12 @@ public class DataLoader {
         return time;
     }
 
+    /**
+     * Returns a string (for the Pebble) with the title and the location of the first schedule, in the form: Title @ Location
+     *
+     * @param context current context
+     * @return title and location of the first schedule
+     */
     public String getFirstScheduleDescription(Context context) {
         Time t = new Time();
         t.setToNow();
@@ -84,6 +96,13 @@ public class DataLoader {
         return location;
     }
 
+    /**
+     * Returns a set of information available about the first schedule
+     * {Title, StartTime, EndTime, Location, Description}
+     *
+     * @param context current context
+     * @return a list of information about the first schedule
+     */
     public Object[] getFirstScheduleInformation(Context context) {
         Time t = new Time();
         t.setToNow();
@@ -106,6 +125,12 @@ public class DataLoader {
         return information;
     }
 
+    /**
+     * Returns a location of the first schedule
+     *
+     * @param context current context
+     * @return location of the first schedule
+     */
     public String getFirstScheduleLocation(Context context) {
         Time t = new Time();
         t.setToNow();
@@ -124,6 +149,13 @@ public class DataLoader {
         return location;
     }
 
+    /**
+     * Start an asynchronous process to get the last (current) location of the device
+     * It will use the last known location if it is available and is not older than 15 minutes
+     *
+     * @param context current context
+     * @param alarmPrototype an AlarmPrototype class to pass the data to
+     */
     public void getLastLocation(final Context context, final AlarmPrototype alarmPrototype) {
         Log.i("DataLoader", "I am in the getLastLocation");
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -133,7 +165,7 @@ public class DataLoader {
         String bestProvider = locationManager.getBestProvider(criteria, false);
         final Location location = locationManager.getLastKnownLocation(bestProvider);
 
-        if (location == null || ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) / 1000000) >= 900000){   // 15 minutes
+        if (location == null || ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) / 1000000) >= 900000) {   // 15 minutes
             /*
             locationManager.requestSingleUpdate(bestProvider, new LocationListener() {
                 @Override
@@ -166,7 +198,10 @@ public class DataLoader {
         }
     }
 
-    protected class LocationInfo implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+    /**
+     * Implements callback functions for getting the location information
+     */
+    protected class LocationInfo implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
         private Context context;
         private AlarmPrototype alarmPrototype;
@@ -211,16 +246,33 @@ public class DataLoader {
         }
     }
 
+    /**
+     * Starts an asynchronous process to get the traffic time from the current location to the given location
+     *
+     * @param context current context
+     * @param location destination
+     * @param alarmPrototype an AlarmPrototype class to pass the data to
+     */
     public void getTrafficTime(Context context, Location location, AlarmPrototype alarmPrototype) {
         MapLoader mapLoader = new MapLoader(location.getLatitude(), location.getLongitude(), getFirstScheduleLocation(context), alarmPrototype);
         mapLoader.execute();
     }
 
+    /**
+     * Starts an asynchronous process to get the weather information at the given location
+     *
+     * @param location destination
+     * @param time time for the forecast
+     * @param alarmPrototype an AlarmPrototype class to pass the data to
+     */
     public void getWeather(Location location, Long time, AlarmPrototype alarmPrototype) {
         WeatherLoader weatherLoader = new WeatherLoader(location.getLatitude(), location.getLongitude(), time, alarmPrototype);
         weatherLoader.execute();
     }
 
+    /**
+     * AsyncTask to get traffic information
+     */
     private class MapLoader extends AsyncTask<Void, Void, Integer> {
 
         private double latitude, longitude;
@@ -271,6 +323,10 @@ public class DataLoader {
         }
     }
 
+    /**
+     * AsyncTask to get weather information
+     * Returns a temperature, a weather code, and a human-readable string information about the weather
+     */
     private class WeatherLoader extends AsyncTask<Void, Void, Object[]> {
 
         private double latitude, longitude;

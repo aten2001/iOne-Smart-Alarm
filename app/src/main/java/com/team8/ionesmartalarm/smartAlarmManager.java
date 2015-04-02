@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
- * @author Clayton
+ * @author Team 8
  *
  * Manages the set-alarm listener.
  */
