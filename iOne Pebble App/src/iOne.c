@@ -119,9 +119,10 @@ static void getup_alarm(void *data) {
   }
 }
 
-/*****************************************
- * Scale data so that always positive    *
- *****************************************/
+/******************************************************************
+ * Scale accelerometer data so that always positive. Modified from
+ * Morpheuz app by James Fowler           
+ *****************************************************************/
 static uint16_t scale_accel(int16_t val) {
   int16_t retval = 4000 + val;
   if (retval < 0)
@@ -129,9 +130,10 @@ static uint16_t scale_accel(int16_t val) {
   return retval;
 }
 
-/*******************************************
- * Find biggest normalized deviation       *
- *******************************************/
+/*****************************************************************
+ * Find accelerometer biggest normalized deviation. Modified from 
+ * Morpheuz app by James Fowler                                  
+ *****************************************************************/
 static void do_axis(int16_t val, uint16_t *biggest, uint32_t avg) {
   uint16_t val_scale = scale_accel(val);
   if (val_scale < avg)
@@ -142,16 +144,17 @@ static void do_axis(int16_t val, uint16_t *biggest, uint32_t avg) {
     *biggest = val_scale;
 }
 
-/*********************************
- * Process accelerometer data    *
- *********************************/
+/*****************************************************************
+ * Process accelerometer data. Modified from Morpheuz app
+ * by James Fowler
+ *****************************************************************/
 static void accel_data_handler(AccelData *data, uint32_t num_samples) {
-//   uint32_t countdown = 0;
   // Average the data
   uint32_t avg_x = 0;
   uint32_t avg_y = 0;
   uint32_t avg_z = 0;
   AccelData *dx = data;
+  
   for (uint32_t i = 0; i < num_samples; i++, dx++) {
     // If vibe went off then discount everything
     if (dx->did_vibrate) {
@@ -175,21 +178,16 @@ static void accel_data_handler(AccelData *data, uint32_t num_samples) {
     do_axis(d->z, &biggest, avg_z);
   }
 
-//   store_sample(biggest);
-  // Long lived buffer
+  //check to see if movement bigger than current biggest
   static char s_buffer[128];
-
   if (biggest > biggest_movement)
     biggest_movement = biggest;
     
+  //check to see if they shook hard
   if (biggest > SHAKE_THRESHOLD)
     shake_cnt += 1;
     
-  // Compose string of all data
-//   snprintf(s_buffer, sizeof(s_buffer), 
-//     "X: %lu\nY: %lu\nZ: %lu\nBiggest: %lu\nShakes: %lu", 
-//     (unsigned long)avg_x, (unsigned long)avg_y, (unsigned long)avg_z, (unsigned long)biggest, (unsigned long)shake_cnt);
-
+  //Show different info on bottom based on which button user pressed
   if (SHOW_SHAKE)
       snprintf(s_buffer, sizeof(s_buffer), "Shakes: %lu", (unsigned long)shake_cnt);
   if (SHOW_MOVEMENT)
@@ -233,7 +231,7 @@ static void update_time() {
   // Display this time on the TextLayer
   text_layer_set_text(time_layer, buffer);
   
-  //Display this time on the DateLayer
+  //Display this date on the DateLayer
   strftime(date_buffer, sizeof(date_buffer), "%A, %b %e", tick_time);
   text_layer_set_text(date_layer, date_buffer);
 }
@@ -252,9 +250,15 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
     }
 }
 
-/*********************************
- * App Communication Functions   *
- *********************************/
+/*********************************************************************
+/---------------------------------------------------------------------
+ * App Communication Handlers    
+----------------------------------------------------------------------/
+/*********************************************************************/
+ 
+ /*********************************
+ *         Inbox handler          *
+ **********************************/
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Read first item
   Tuple *t = dict_read_first(iterator);
@@ -265,6 +269,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // Which key was received?
     switch(t->key) {
       case WAKE_UP:
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Wakeup Key", window);
         wake_up_val = t->value->uint8;
         if (wake_up_val == 1){
           get_up_val = 0;
@@ -274,6 +279,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         }
         break;
       case GET_UP:
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Getup Key", window);
         get_up_val = t->value->uint8;
         if (get_up_val == 1){
           wake_up_val = 0;
@@ -283,20 +289,24 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         }
         break;
       case CALENDAR:
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Calendar Wakeup Key", window);
         snprintf(s_buffer, sizeof(s_buffer), "Event: %s", t->value->cstring);
         //Show the data
         text_layer_set_text(event_layer, s_buffer);
         break;
       case WEATHER:
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Weather Key", window);
         snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
         text_layer_set_text(weather_layer, s_buffer);
         alarm_set_message = t->value->cstring;
         break;
       case ALARM_SET_TIME:
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Alarm Set Key", window);
         snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
         text_layer_set_text(text_layer, s_buffer);
         break;
       case ALARM_ON:
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Why the hell you sending me Alarm On Key?", window);
         break;
       default:
         APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
@@ -307,21 +317,34 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   }
 }
 
+ /*********************************
+ *      Inbox drop handler        *
+ **********************************/
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
 }
 
+ /*********************************
+ *    Outbbox drop handler        *
+ **********************************/
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
   APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
 }
 
+ /*********************************
+ *         Outbox handler          *
+ **********************************/
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
-/*********************************
- * Standard Pebble App Setup     *
- *********************************/
+
+/*********************************************************************
+/---------------------------------------------------------------------
+ * Button Click Handlers    
+----------------------------------------------------------------------/
+/*********************************************************************/
+
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   SHOW_SHAKE = false;
   SHOW_MOVEMENT = false;
@@ -345,6 +368,13 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
+
+/*********************************************************************
+/---------------------------------------------------------------------
+ * Mandatory Pebble App Setup    
+----------------------------------------------------------------------/
+/*********************************************************************/
+
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
 
