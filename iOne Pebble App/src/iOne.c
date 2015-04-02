@@ -82,7 +82,7 @@ static void gradual_alarm(void *data) {
     alarm_timer = app_timer_register(((uint16_t) alarm_pattern[alarm_count % (ARRAY_LENGTH(alarm_pattern))]) * 1000, gradual_alarm, NULL);
   else{
     biggest_movement = 0;
-    alarm_message((uint8_t) 0); 
+    alarm_message(0); 
     alarm_on_val = 0;
     wake_up_val = 0;
   }
@@ -114,7 +114,7 @@ static void getup_alarm(void *data) {
     alarm_timer = app_timer_register(1000, getup_alarm, NULL);
   else{
     biggest_movement = 0;
-    alarm_message((uint8_t) 0);
+    alarm_message(0);
     alarm_on_val = 0;
     get_up_val = 0;
   }
@@ -265,6 +265,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   // Read first item
   Tuple *t = dict_read_first(iterator);
   static char s_buffer[128];
+  static char w_buffer[128];
+  static char e_buffer[128];
+
 
   // For all items
   while(t != NULL) {
@@ -295,20 +298,20 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         }
         break;
       case CALENDAR:
-        APP_LOG(APP_LOG_LEVEL_INFO, "Calendar Wakeup Key");
+        APP_LOG(APP_LOG_LEVEL_INFO, "Received Calendar Key");
         snprintf(s_buffer, sizeof(s_buffer), "Event: %s", t->value->cstring);
         //Show the data
         text_layer_set_text(event_layer, s_buffer);
         break;
       case WEATHER:
         APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Key");
-        snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
-        text_layer_set_text(weather_layer, s_buffer);
+        snprintf(w_buffer, sizeof(w_buffer), "%s", t->value->cstring);
+        text_layer_set_text(weather_layer, w_buffer);
         break;
       case ALARM_SET_TIME:
         APP_LOG(APP_LOG_LEVEL_INFO, "Received Alarm Set Key");
-        snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
-        text_layer_set_text(text_layer, s_buffer);
+        snprintf(e_buffer, sizeof(e_buffer), "%s", t->value->cstring);
+        text_layer_set_text(text_layer, e_buffer);
         alarm_set_message = t->value->cstring;
         break;
       case ALARM_ON:
