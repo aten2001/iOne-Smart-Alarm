@@ -46,5 +46,5 @@ public interface AlarmPrototype {
 
     public void onMapTaskCompleted(int duration);
 
-    public void onWeatherTaskCompleted(int temperature, int code);
+    public void onWeatherTaskCompleted(int temperature, int code, String description);
 }

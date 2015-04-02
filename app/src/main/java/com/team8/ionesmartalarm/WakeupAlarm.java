@@ -14,6 +14,7 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
     private int firstScheduleTime, duration = -1;
     private double temperature = -1;
     private Weather weather = null;
+    private String weatherDescription = null;
     private boolean isFirstSet;
     private final Long repeatingAlarmCheck = 600000l;
     private final Long earlyCheckDiff = 1800000l;
@@ -24,6 +25,7 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
         this.firstScheduleTime = this.duration = -1;
         this.temperature = -1;
         this.weather = null;
+        this.weatherDescription = null;
     }
 
     protected void onHandleIntent(Intent intent){
@@ -64,10 +66,11 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
         }
     }
 
-    public void onWeatherTaskCompleted(int temperature, int code) {
-        Log.d("WakeupAlarm", "temperature: " + temperature + ", code: " + code + ", weather: " + Weather.getWeather(code).name()); // TEST
+    public void onWeatherTaskCompleted(int temperature, int code, String description) {
+        Log.d("WakeupAlarm", "temperature: " + temperature + ", code: " + code + ", weather: " + Weather.getWeather(code).name() + ", description: " + description); // TEST
         this.temperature = temperature;
         this.weather = Weather.getWeather(code);
+        this.weatherDescription = description;
         if (duration != -1) {
             onAllTasksCompleted();
         }

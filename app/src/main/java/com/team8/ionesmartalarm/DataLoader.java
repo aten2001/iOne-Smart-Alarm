@@ -110,7 +110,8 @@ public class DataLoader {
         String bestProvider = locationManager.getBestProvider(criteria, false);
         final Location location = locationManager.getLastKnownLocation(bestProvider);
 
-        if (location == null){ /** || ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) / 1000000) >= 900000) {   // 15 minutes
+        if (location == null || ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) / 1000000) >= 900000){   // 15 minutes
+            /*
             locationManager.requestSingleUpdate(bestProvider, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
@@ -247,7 +248,7 @@ public class DataLoader {
         }
     }
 
-    private class WeatherLoader extends AsyncTask<Void, Void, Integer[]> {
+    private class WeatherLoader extends AsyncTask<Void, Void, Object[]> {
 
         private double latitude, longitude;
         private long time;
@@ -265,7 +266,7 @@ public class DataLoader {
         }
 
         @Override
-        protected Integer[] doInBackground(Void... params) {
+        protected Object[] doInBackground(Void... params) {
             String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + latitude + "&lon=" + longitude;
             HttpClient client = new DefaultHttpClient();
             HttpGet request = new HttpGet(url);
@@ -284,9 +285,10 @@ public class DataLoader {
                 }
                 if (forecast == null) return null;
                 Log.i("WeatherLoader", "forecast: " + forecast.toString()); // TEST
-                Integer[] data = new Integer[2];
+                Object[] data = new Object[3];
                 data[0] = forecast.getJSONObject("main").getInt("temp");
                 data[1] = forecast.getJSONArray("weather").getJSONObject(0).getInt("id");
+                data[2] = forecast.getJSONArray("weather").getJSONObject(0).getString("main");
                 return data;
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -295,12 +297,12 @@ public class DataLoader {
         }
 
         @Override
-        protected void onPostExecute(Integer[] data) {
+        protected void onPostExecute(Object[] data) {
             super.onPostExecute(data);
             Log.i("WeatherLoader", "temperature: " + data[0] + ", weather code: " + data[1]);
 
             if (alarmPrototype != null) {
-                alarmPrototype.onWeatherTaskCompleted(data[0], data[1]);
+                alarmPrototype.onWeatherTaskCompleted((int) data[0], (int) data[1], (String) data[2]);
             }
         }
     }
