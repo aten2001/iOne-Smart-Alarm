@@ -250,10 +250,10 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
     }
 }
 
-/*********************************************************************
-/---------------------------------------------------------------------
- * App Communication Handlers    
-----------------------------------------------------------------------/
+/*********************************************************************/
+/*-------------------------------------------------------------------*/
+/*                      App Communication Handlers                   */
+/*-------------------------------------------------------------------*/
 /*********************************************************************/
  
  /*********************************
@@ -269,7 +269,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // Which key was received?
     switch(t->key) {
       case WAKE_UP:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Wakeup Key", window);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Received Wakeup Key");
         wake_up_val = t->value->uint8;
         if (wake_up_val == 1){
           get_up_val = 0;
@@ -279,7 +279,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         }
         break;
       case GET_UP:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Getup Key", window);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Received Getup Key");
         get_up_val = t->value->uint8;
         if (get_up_val == 1){
           wake_up_val = 0;
@@ -289,24 +289,24 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         }
         break;
       case CALENDAR:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Calendar Wakeup Key", window);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Calendar Wakeup Key");
         snprintf(s_buffer, sizeof(s_buffer), "Event: %s", t->value->cstring);
         //Show the data
         text_layer_set_text(event_layer, s_buffer);
         break;
       case WEATHER:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Weather Key", window);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Key");
         snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
         text_layer_set_text(weather_layer, s_buffer);
         alarm_set_message = t->value->cstring;
         break;
       case ALARM_SET_TIME:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Alarm Set Key", window);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Received Alarm Set Key");
         snprintf(s_buffer, sizeof(s_buffer), "%s", t->value->cstring);
         text_layer_set_text(text_layer, s_buffer);
         break;
       case ALARM_ON:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Why the hell you sending me Alarm On Key?", window);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Why the hell you sending me Alarm On Key?");
         break;
       default:
         APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
@@ -339,10 +339,10 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 }
 
 
-/*********************************************************************
-/---------------------------------------------------------------------
- * Button Click Handlers    
-----------------------------------------------------------------------/
+/*********************************************************************/
+/*-------------------------------------------------------------------*/
+/*                       Button Click Handlers                       */
+/*-------------------------------------------------------------------*/
 /*********************************************************************/
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -369,10 +369,10 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
 
-/*********************************************************************
-/---------------------------------------------------------------------
- * Mandatory Pebble App Setup    
-----------------------------------------------------------------------/
+/*********************************************************************/
+/*-------------------------------------------------------------------*/
+/*                      Mandatory Pebble App Setup                   */
+/*-------------------------------------------------------------------*/
 /*********************************************************************/
 
 static void window_load(Window *window) {
