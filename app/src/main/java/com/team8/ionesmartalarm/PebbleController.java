@@ -7,6 +7,7 @@ import android.util.Log;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 public class PebbleController {
@@ -52,6 +53,19 @@ public class PebbleController {
         PebbleDictionary data = new PebbleDictionary();
         data.addString(2, info);
         PebbleKit.sendDataToPebble(context, ALARM_UUID, data);
+    }
+
+    public void sendWeatherInfoToWatch(Context context, int temperature, String weather) {
+        PebbleDictionary data = new PebbleDictionary();
+        data.addString(3, temperature + "º, " + weather);
+        PebbleKit.sendDataToPebble(context, ALARM_UUID, data);
+    }
+
+    public void sendAlarmInfoToWatch(Context context, long wakeupTime, long getupTime) {
+        PebbleDictionary data = new PebbleDictionary();
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+        data.addString(4, sdf.format(wakeupTime) + " - " + sdf.format(getupTime));
+        PebbleKit.sendDataToPebble(context, ALARM_UUID, data);;
     }
 
     public void startAlarmApp(Context context) {
