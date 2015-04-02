@@ -36,9 +36,13 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
     }
 
     public void wakeupProcedure(Context context) {
+        DataLoader info = new DataLoader();
         //Launch the activity to allow a user to snooze
         Intent newActivity = new Intent(this, SnoozeScreen.class);
         newActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        newActivity.putExtra("weatherInfo", this.weatherDescription);
+        newActivity.putExtra("tempInfo", this.temperature);
+        newActivity.putExtra("eventDescr", info.getFirstScheduleDescription(this));
         this.startActivity(newActivity);
     }
 
