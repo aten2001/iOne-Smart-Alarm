@@ -15,7 +15,8 @@ import android.widget.TextView;
 
 public class SnoozeScreen extends ActionBarActivity {
 
-    private  PowerManager.WakeLock wakeLock;
+    private PowerManager.WakeLock wakeLock;
+    private PebbleController pebble;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +39,21 @@ public class SnoozeScreen extends ActionBarActivity {
         DataLoader info = new DataLoader();
         TextView eventDescription = (TextView) this.findViewById(R.id.eventDescription);
         eventDescription.setText(info.getFirstScheduleDescription(this));
+
+        Bundle passedData = this.getIntent().getExtras();
+        String weather = passedData.getString("weatherInfo", "Thunderstorm");
+        Double temp = passedData.getDouble("weatherInfo", 20);
+        String eventDescr = passedData.getString("eventDescr", "No Events");
+        //Start the pebble procedure
+        pebble = new PebbleController();
+        startPebbleWakeup(weather, temp, eventDescr);
+    }
+
+    private void startPebbleWakeup(String weather, Double temp, String eventDescription){
+        pebble.beginReceivingDataFromWatch(this);
+        pebble.startAlarmApp(this);
+        pebble.turnOnAlarm(this, true);
+        Log.d("SnoozeAlarm", "Event descr: " + eventDescription);
     }
 
 
@@ -64,7 +80,15 @@ public class SnoozeScreen extends ActionBarActivity {
     }
 
     public void snooze(View view){
-        wakeLock.release();
+        pebble.turnOffAlarm(this, true);
+        pebble.stopReceivingDataFromWatch(this);
         this.finish();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+        wakeLock.release();
     }
 }

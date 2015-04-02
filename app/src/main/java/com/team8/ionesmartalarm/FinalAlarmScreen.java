@@ -22,13 +22,8 @@ public class FinalAlarmScreen extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_final_alarm_screen);
 
-        PebbleController pebble = new PebbleController();
-        pebble.startAlarmApp(this);
-        pebble.beginReceivingDataFromWatch(this);
-        pebble.turnOnAlarm(this, true);
-
         PowerManager powerManager = (PowerManager) this.getApplicationContext().getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "wakeupAlarm");
+        wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "getupAlarm");
         wakeLock.acquire();
 
         //get past lock screen
@@ -41,9 +36,14 @@ public class FinalAlarmScreen extends ActionBarActivity {
         Ringtone ringtone = RingtoneManager.getRingtone(this.getApplicationContext(), alarmSound);
         ringtone.play();
 
-
+        startPebbleGetup();
     }
 
+    private void startPebbleGetup(){
+        PebbleController pebble = new PebbleController();
+        pebble.startAlarmApp(this);
+        pebble.turnOnAlarm(this, false);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
