@@ -44,7 +44,8 @@ public class DataLoader {
             Events.TITLE,
             Events.DTSTART,
             Events.DTEND,
-            Events.EVENT_LOCATION
+            Events.EVENT_LOCATION,
+            Events.DESCRIPTION
     };
 
     public long getFirstScheduleTime(Context context) {
@@ -81,6 +82,28 @@ public class DataLoader {
         String location = mCursor.getCount() == 0 ? null : (mCursor.getString(0) + " @ " + mCursor.getString(3));
         mCursor.close();
         return location;
+    }
+
+    public Object[] getFirstScheduleInformation(Context context) {
+        Time t = new Time();
+        t.setToNow();
+        String dtStart = Long.toString(t.toMillis(false));
+        t.set(59, 59, 23, t.monthDay, t.month, t.year);
+        String dtEnd = Long.toString(t.toMillis(false));
+
+        String selection = "((" + Events.DTSTART + " >= ?) AND (" + Events.DTEND + " <= ?))";
+        String[] selectionArgs = new String[]{dtStart, dtEnd};
+
+        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, null);
+        mCursor.moveToFirst();
+
+        if (mCursor.getCount() == 0)
+            return null;
+
+        Object[] information = {mCursor.getString(0), mCursor.getLong(1), mCursor.getLong(2), mCursor.getString(3), mCursor.getString(4)};
+        mCursor.close();
+
+        return information;
     }
 
     public String getFirstScheduleLocation(Context context) {
