@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.text.format.Time;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 
@@ -48,11 +49,22 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
         DataLoader dataLoader = new DataLoader();
         Log.d("GetupAlarm", "first location: " + dataLoader.getFirstScheduleLocation(context)); // TEST
         Log.d("GetupAlarm", "first time: " + dataLoader.getFirstScheduleTime(context)); // TEST
-        firstScheduleTime = (int) (dataLoader.getFirstScheduleTime(context) / 1000);
+        long firstTime = dataLoader.getFirstScheduleTime(context);
+        if (firstTime == -1) {
+            Time time = new Time();
+            time.setToNow();
+            time.set(0, 0, 8, time.monthDay, time.month, time.year);
+            firstScheduleTime = (int) (time.toMillis(false) / 1000);
+        } else firstScheduleTime = (int) (firstTime / 1000);
         dataLoader.getLastLocation(context, this);
     }
 
     public void onLocationTaskCompleted(Context context, Location location) {
+        if (location == null) {
+            Toast.makeText(getApplicationContext(), "Failed to get the current location", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Log.d("GetupAlarm", "latitude: " + location.getLatitude() + ", longitude: " + location.getLongitude()); // TEST
         DataLoader dataLoader = new DataLoader();
         dataLoader.getTrafficTime(context, location, this);
@@ -62,6 +74,11 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
     }
 
     public void onMapTaskCompleted(int duration) {
+        if (duration == -1) {
+            Toast.makeText(getApplicationContext(), "Failed to get the traffic information", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Log.d("GetupAlarm", "duration: " + duration); // TEST
         this.duration = duration;
         if (temperature != -1) {
@@ -70,6 +87,14 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
     }
 
     public void onWeatherTaskCompleted(int temperature, int code, String description) {
+        if (temperature == -1) {
+            Toast.makeText(getApplicationContext(), "Failed to get the temperature information", Toast.LENGTH_LONG).show();
+            return;
+        } else if (code == -1 || description == null) {
+            Toast.makeText(getApplicationContext(), "Failed to get the weather information", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Log.d("GetupAlarm", "temperature: " + temperature + ", code: " + code + ", weather: " + Weather.getWeather(code).name() + ", description: " + description); // TEST
         this.temperature = temperature;
         this.weather = Weather.getWeather(code);
