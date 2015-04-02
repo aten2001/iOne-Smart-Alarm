@@ -67,6 +67,7 @@ public class SmartAlarmManager {
 
             appState.edit().putInt(IS_ACTIVE_WAKEUP, 0).commit();
         }
+        //I need to try and delete a set alarm
         Log.i("SmartAlarmManager", "The alarm has been canceled");
 
         // Write to memory

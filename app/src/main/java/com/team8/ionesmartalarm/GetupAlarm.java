@@ -1,9 +1,12 @@
 package com.team8.ionesmartalarm;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.support.v4.app.NotificationCompat;
 import android.text.format.Time;
 import android.util.Log;
 import android.widget.Toast;
@@ -124,6 +127,8 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
             Long nextWakeTime;
             if(isFirstSet) {
                 nextWakeTime = time - earlyCheckDiff;
+
+                sendPushNotification(sdf.format(time));
             }
             else{
                 Long nextCycleWake = System.currentTimeMillis() + repeatingAlarmCheck;
@@ -141,5 +146,17 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
             pebble.startAlarmApp(this);
             pebble.sendAlarmInfoToWatch(this, time*1000, time*1000);
         }
+    }
+
+    public void sendPushNotification(String alarmTime){
+        //Send a notification
+        PendingIntent notPending = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_plusone_small_off_client)
+                .setContentTitle("Next Wakeup Alarm")
+                .setContentText(alarmTime)
+                .setContentIntent(notPending);
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1941, notification.build());
     }
 }
