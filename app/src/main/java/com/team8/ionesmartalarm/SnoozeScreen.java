@@ -50,9 +50,14 @@ public class SnoozeScreen extends ActionBarActivity {
         eventDescription.setText((String)calInfo[4]);
 
         Bundle passedData = this.getIntent().getExtras();
-        String weather = passedData.getString("weatherInfo", "Thunderstorm");
-        Double temp = passedData.getDouble("tempInfo", 20);
-        String eventDescr = passedData.getString("eventDescr", "No Events");
+        String weather = "";
+        String eventDescr = "";
+        Double temp = 0d;
+        if(passedData != null) {
+            weather = passedData.getString("weatherInfo", "Thunderstorm");
+            temp = passedData.getDouble("tempInfo", 20);
+            eventDescr = passedData.getString("eventDescr", "No Events");
+        }
         //Start the pebble procedure
         pebble = new PebbleController();
         startPebbleWakeup(weather, temp, eventDescr);

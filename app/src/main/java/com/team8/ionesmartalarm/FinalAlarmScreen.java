@@ -46,9 +46,15 @@ public class FinalAlarmScreen extends ActionBarActivity {
 
         //Get the info for the pebble
         Bundle passedData = this.getIntent().getExtras();
-        String weather = passedData.getString("weatherInfo", "");
-        Double temp = passedData.getDouble("tempInfo", 0);
-        String eventDescr = passedData.getString("eventDescr", "");
+        String weather = "";
+        String eventDescr = "";
+        Double temp = 0d;
+        if(passedData != null) {
+            weather = passedData.getString("weatherInfo", "");
+            temp = passedData.getDouble("tempInfo", 0);
+            eventDescr = passedData.getString("eventDescr", "");
+        }
+
 
         pebble = new PebbleController();
         startPebbleGetup(weather, temp, eventDescr);
