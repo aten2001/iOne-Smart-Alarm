@@ -27,12 +27,13 @@ public class PebbleReceiver extends BroadcastReceiver {
                 final PebbleDictionary data = PebbleDictionary.fromJson(jsonData);
                 Log.d("PebbleReceiver", "received: " + jsonData);
                 // do what you need with the data
-                if (data.getBytes(5)[0] == 1) {
+                Long value = data.getUnsignedIntegerAsLong(5);
+                if (value != null && value == 1) {
                     Intent newActivity = new Intent(context, FinalAlarmScreen.class);
                     newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(newActivity);
                 }
-                else if(data.getBytes(5)[0] == 0){
+                else if(value != null){
                     context.sendBroadcast(new Intent("PEBBLE_SILENCE"));
                 }
                 PebbleKit.sendAckToPebble(context, transactionId);
