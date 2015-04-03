@@ -81,7 +81,7 @@ public class MainActivity extends ActionBarActivity {
             // Disable the alarm from restarting on reboot
             packageManager.setComponentEnabledSetting(alarmRebootReceiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
             Log.i("MainActivity", "The alarm has reboot alarm disabled");
-            smartAlarm.cancelAlarm();
+            smartAlarm.cancelAlarm(this);
         }
     }
 }

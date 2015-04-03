@@ -59,19 +59,31 @@ public class SmartAlarmManager {
         appState.edit().putInt(IS_ACTIVE_DATA, 1).commit();
     }
 
-    public void cancelAlarm(){
+    public void cancelAlarm(Context context){
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(alarmIntent);
+
         if(wakeupPending != null) {
             alarmManager.cancel(wakeupPending);
 
             appState.edit().putInt(IS_ACTIVE_WAKEUP, 0).commit();
         }
+        if(wakeupIntent == null && appState.getInt(IS_ACTIVE_WAKEUP, 0) == 1){
+            setWakeupAlarm(context, 702954000000l);
+        }
+        if(getupIntent == null && appState.getInt(IS_ACTIVE_GETUP, 0) == 1){
+            setGetupAlarm(context, 702954000000l);
+        }
+
+        alarmManager.cancel(alarmIntent);
+        alarmManager.cancel(wakeupPending);
+        alarmManager.cancel(getupPending);
         //I need to try and delete a set alarm
         Log.i("SmartAlarmManager", "The alarm has been canceled");
 
         // Write to memory
         appState.edit().putInt(IS_ACTIVE_DATA, 0).commit();
+        appState.edit().putInt(IS_ACTIVE_WAKEUP, 0).commit();
+        appState.edit().putInt(IS_ACTIVE_GETUP, 0).commit();
     }
 
     public void setWakeupAlarm(Context context, Long alarmMilli){

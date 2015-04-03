@@ -162,7 +162,7 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
             //Send the wakeup time to the pebble
             PebbleController pebble = new PebbleController();
             pebble.startAlarmApp(this);
-            pebble.sendAlarmInfoToWatch(this, time*1000, time*1000);
+            pebble.sendAlarmInfoToWatch(this, time, time);
         }
     }
 }
