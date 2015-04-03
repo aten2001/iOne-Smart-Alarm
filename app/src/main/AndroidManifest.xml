@@ -57,11 +57,11 @@
 
         <activity
             android:name=".SnoozeScreen"
-            android:label="@string/title_activity_snooze_screen" >
+            android:label="@string/app_name" >
         </activity>
         <activity
             android:name=".FinalAlarmScreen"
-            android:label="@string/title_activity_final_alarm_screen" >
+            android:label="@string/app_name" >
         </activity>
     </application>
 
