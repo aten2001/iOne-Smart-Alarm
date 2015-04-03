@@ -24,6 +24,7 @@ public class FinalAlarmScreen extends ActionBarActivity {
 
     private  PowerManager.WakeLock wakeLock;
     private PebbleController pebble;
+    private  Ringtone ringtone;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +44,7 @@ public class FinalAlarmScreen extends ActionBarActivity {
         if(alarmSound == null){
             alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
         }
-        Ringtone ringtone = RingtoneManager.getRingtone(this.getApplicationContext(), alarmSound);
+        ringtone = RingtoneManager.getRingtone(this.getApplicationContext(), alarmSound);
         ringtone.play();
 
         //Get the info for the pebble
@@ -98,12 +99,14 @@ public class FinalAlarmScreen extends ActionBarActivity {
         pebble.turnOffAlarm(this, false);
         unregisterReceiver(pebbleSilenceReceiver);
         SmartAlarmManager.getupAlarmCanceled();
+        ringtone.stop();
         wakeLock.release();
     }
 
     BroadcastReceiver pebbleSilenceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             FinalAlarmScreen.this.finish();
         }
     };
