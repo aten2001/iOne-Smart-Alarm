@@ -426,7 +426,7 @@ static void window_load(Window *window) {
     
   // Show varying information here
   text_layer = text_layer_create(GRect(0, 130, 144, 30));
-  alarm_set_message = "Setting Alarm...";
+  alarm_set_message = "iOne Smart Alarm";
   text_layer_set_text(text_layer, alarm_set_message);
   text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
