@@ -27,7 +27,8 @@ public class PebbleReceiver extends BroadcastReceiver {
                 final PebbleDictionary data = PebbleDictionary.fromJson(jsonData);
                 Log.d("PebbleReceiver", "received: " + jsonData);
                 // do what you need with the data
-                if (data.getBytes(5)[0] == 1) {
+                Long value = data.getUnsignedIntegerAsLong(5);
+                if (value != null && value == 1) {
                     // TODO: Start the getup alarm
                 }
                 PebbleKit.sendAckToPebble(context, transactionId);
