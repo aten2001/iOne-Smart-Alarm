@@ -17,7 +17,7 @@ import java.util.UUID;
  */
 public class PebbleController {
 
-    private static final UUID ALARM_UUID = UUID.fromString("2ba1d5d1-0868-4a15-b972-eefe5e01d3a0");
+    public static final UUID ALARM_UUID = UUID.fromString("2ba1d5d1-0868-4a15-b972-eefe5e01d3a0");
     private PebbleKit.PebbleDataReceiver alarmDataReceiver = null;
 
     /**
@@ -60,7 +60,7 @@ public class PebbleController {
     public void sendDataToWatch(Context context, int key, byte value, String calendarInfo, String tempAndWeather) {
         PebbleDictionary data = new PebbleDictionary();
         data.addUint8(key, value);
-        if(key==1) {
+        if (value == 1) {
             data.addString(2, calendarInfo);
             data.addString(3, tempAndWeather);
         }

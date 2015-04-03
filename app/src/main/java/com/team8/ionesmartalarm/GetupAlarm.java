@@ -142,9 +142,9 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
             MainActivity.smartAlarm.setGetupAlarm(this, nextWakeTime);
 
             //Send the wakeup time to the pebble
-            PebbleController pebble = new PebbleController();
-            pebble.startAlarmApp(this);
-            pebble.sendAlarmInfoToWatch(this, time, time);
+//            PebbleController pebble = new PebbleController();
+//            pebble.startAlarmApp(this);
+//            pebble.sendAlarmInfoToWatch(this, time, time);
         }
     }
 

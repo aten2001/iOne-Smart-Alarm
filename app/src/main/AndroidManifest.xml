@@ -49,6 +49,11 @@
             android:enabled="true"
             android:exported="true" >
         </receiver>
+        <receiver android:name=".PebbleReceiver">
+            <intent-filter>
+                <action android:name="com.getpebble.action.app.RECEIVE" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".SnoozeScreen"
