@@ -89,6 +89,7 @@ public class FinalAlarmScreen extends ActionBarActivity {
 
         pebble.turnOffAlarm(this, false);
         unregisterReceiver(pebbleSilenceReceiver);
+        SmartAlarmManager.getupAlarmCanceled();
         wakeLock.release();
     }
 
