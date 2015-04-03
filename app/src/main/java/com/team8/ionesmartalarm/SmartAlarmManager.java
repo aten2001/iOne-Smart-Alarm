@@ -129,4 +129,12 @@ public class SmartAlarmManager {
     public boolean isWakeupActive(){
         return appState.getInt(IS_ACTIVE_WAKEUP, 0) == 1;
     }
+
+    public void getupAlarmCanceled(){
+        appState.edit().putInt(IS_ACTIVE_WAKEUP, 0).commit();
+    }
+
+    public void wakeupAlarmCanceled(){
+        appState.edit().putInt(IS_ACTIVE_GETUP, 0).commit();
+    }
 }

@@ -28,7 +28,12 @@ public class PebbleReceiver extends BroadcastReceiver {
                 Log.d("PebbleReceiver", "received: " + jsonData);
                 // do what you need with the data
                 if (data.getBytes(5)[0] == 1) {
-                    // TODO: Start the getup alarm
+                    Intent newActivity = new Intent(context, FinalAlarmScreen.class);
+                    newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(newActivity);
+                }
+                else if(data.getBytes(5)[0] == 0){
+                    context.sendBroadcast(new Intent("PEBBLE_SILENCE"));
                 }
                 PebbleKit.sendAckToPebble(context, transactionId);
             } catch (JSONException e) {

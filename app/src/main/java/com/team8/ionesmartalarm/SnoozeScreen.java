@@ -1,7 +1,9 @@
 package com.team8.ionesmartalarm;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.PowerManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -57,10 +59,11 @@ public class SnoozeScreen extends ActionBarActivity {
     }
 
     private void startPebbleWakeup(String weather, Double temp, String eventDescription){
-        pebble.beginReceivingDataFromWatch(this);
         pebble.startAlarmApp(this);
         pebble.turnOnAlarm(this, true, eventDescription, Integer.toString(temp.intValue())+"º, "+weather);
         Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
+        //Register the pebble receiver
+        registerReceiver(pebbleSilenceReceiver, new IntentFilter("PEBBLE_SILENCE"));
     }
 
     @Override
@@ -94,7 +97,14 @@ public class SnoozeScreen extends ActionBarActivity {
         super.onDestroy();
 
         pebble.turnOffAlarm(this, true);
-        pebble.stopReceivingDataFromWatch(this);
+        unregisterReceiver(pebbleSilenceReceiver);
         wakeLock.release();
     }
+
+    BroadcastReceiver pebbleSilenceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SnoozeScreen.this.finish();
+        }
+    };
 }

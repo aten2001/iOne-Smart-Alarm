@@ -1,6 +1,9 @@
 package com.team8.ionesmartalarm;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -43,9 +46,9 @@ public class FinalAlarmScreen extends ActionBarActivity {
 
         //Get the info for the pebble
         Bundle passedData = this.getIntent().getExtras();
-        String weather = passedData.getString("weatherInfo", "Thunderstorm");
-        Double temp = passedData.getDouble("tempInfo", 20);
-        String eventDescr = passedData.getString("eventDescr", "No Events");
+        String weather = passedData.getString("weatherInfo", "");
+        Double temp = passedData.getDouble("tempInfo", 0);
+        String eventDescr = passedData.getString("eventDescr", "");
 
         pebble = new PebbleController();
         startPebbleGetup(weather, temp, eventDescr);
@@ -53,7 +56,7 @@ public class FinalAlarmScreen extends ActionBarActivity {
 
 
     private void startPebbleGetup(String weather, Double temp, String eventDescription){
-        pebble.beginReceivingDataFromWatch(this);
+        registerReceiver(pebbleSilenceReceiver, new IntentFilter("PEBBLE_SILENCE"));
         pebble.startAlarmApp(this);
         pebble.turnOnAlarm(this, false, eventDescription, Integer.toString(temp.intValue())+"º, "+weather);
         Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
@@ -85,7 +88,14 @@ public class FinalAlarmScreen extends ActionBarActivity {
         super.onDestroy();
 
         pebble.turnOffAlarm(this, false);
-        pebble.stopReceivingDataFromWatch(this);
+        unregisterReceiver(pebbleSilenceReceiver);
         wakeLock.release();
     }
+
+    BroadcastReceiver pebbleSilenceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            FinalAlarmScreen.this.finish();
+        }
+    };
 }
