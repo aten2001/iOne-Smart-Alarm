@@ -131,16 +131,24 @@ public class SmartAlarmManager {
     }
 
     public static void getupAlarmCanceled(){
-        appState.edit().putInt(IS_ACTIVE_WAKEUP, 0).commit();
+        appState.edit().putInt(IS_ACTIVE_GETUP, 0).commit();
     }
 
     public static void wakeupAlarmCanceled(){
-        appState.edit().putInt(IS_ACTIVE_GETUP, 0).commit();
+        appState.edit().putInt(IS_ACTIVE_WAKEUP, 0).commit();
     }
 
     public static boolean isAnyAlarmActive(){
         int anyAlarm = appState.getInt(IS_ACTIVE_GETUP, 0) + appState.getInt(IS_ACTIVE_WAKEUP, 0);
 
         return anyAlarm>0;
+    }
+
+    public static void setWakeupActive(){
+        appState.edit().putInt(IS_ACTIVE_WAKEUP, 1).commit();
+    }
+
+    public static void setGetupActive(){
+        appState.edit().putInt(IS_ACTIVE_GETUP, 1).commit();
     }
 }

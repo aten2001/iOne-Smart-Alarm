@@ -29,6 +29,8 @@ public class SnoozeScreen extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snooze_screen);
 
+        SmartAlarmManager.setWakeupActive();
+
         //Go ahead and set the getup alarm
         Intent getupService = new Intent(this, GetupAlarm.class);
         getupService.putExtra("isFirstGetupAlarmSet", true);

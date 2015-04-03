@@ -30,6 +30,8 @@ public class FinalAlarmScreen extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_final_alarm_screen);
 
+        SmartAlarmManager.setGetupActive();
+
         PowerManager powerManager = (PowerManager) this.getApplicationContext().getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "getupAlarm");
         wakeLock.acquire();
