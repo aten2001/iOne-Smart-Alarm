@@ -29,9 +29,9 @@ public class PebbleReceiver extends BroadcastReceiver {
                 // do what you need with the data
                 Long value = data.getUnsignedIntegerAsLong(5);
                 if (value != null && value == 1 && SmartAlarmManager.isAnyAlarmActive()) {
-                    Intent newActivity = new Intent(context, FinalAlarmScreen.class);
+                    /*Intent newActivity = new Intent(context, FinalAlarmScreen.class);
                     newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(newActivity);
+                    context.startActivity(newActivity);*/
                 }
                 else if(value != null){
                     context.sendBroadcast(new Intent("PEBBLE_SILENCE"));
