@@ -30,7 +30,7 @@ public class PebbleReceiver extends BroadcastReceiver {
                 Long value = data.getUnsignedIntegerAsLong(5);
                 if (value != null && value == 1) {
                     Intent newActivity = new Intent(context, FinalAlarmScreen.class);
-                    newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(newActivity);
                 }
                 else if(value != null){
