@@ -33,7 +33,7 @@ public class SmartAlarmManager {
     private PendingIntent alarmIntent;
     private PendingIntent wakeupPending;
     private PendingIntent getupPending;
-    private SharedPreferences appState;
+    private static SharedPreferences appState;
 
     public SmartAlarmManager(Context contxt){
         this.context = contxt;
@@ -130,11 +130,17 @@ public class SmartAlarmManager {
         return appState.getInt(IS_ACTIVE_WAKEUP, 0) == 1;
     }
 
-    public void getupAlarmCanceled(){
+    public static void getupAlarmCanceled(){
         appState.edit().putInt(IS_ACTIVE_WAKEUP, 0).commit();
     }
 
-    public void wakeupAlarmCanceled(){
+    public static void wakeupAlarmCanceled(){
         appState.edit().putInt(IS_ACTIVE_GETUP, 0).commit();
+    }
+
+    public static boolean isAnyAlarmActive(){
+        int anyAlarm = appState.getInt(IS_ACTIVE_GETUP, 0) + appState.getInt(IS_ACTIVE_WAKEUP, 0);
+
+        return anyAlarm>0;
     }
 }

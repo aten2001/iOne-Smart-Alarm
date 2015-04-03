@@ -98,6 +98,7 @@ public class SnoozeScreen extends ActionBarActivity {
 
         pebble.turnOffAlarm(this, true);
         unregisterReceiver(pebbleSilenceReceiver);
+        SmartAlarmManager.wakeupAlarmCanceled();
         wakeLock.release();
     }
 
