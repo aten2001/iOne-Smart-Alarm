@@ -40,10 +40,7 @@ static void alarm_message(int message, uint8_t alarm_set){
   dict_write_uint8(iter, message, alarm_set);
 
   // Send the message!
-  if (alarm_set == 1)
-      APP_LOG(APP_LOG_LEVEL_INFO, "Sending 1");
-  else 
-      APP_LOG(APP_LOG_LEVEL_INFO, "Sending 0");
+  APP_LOG(APP_LOG_LEVEL_INFO, "Sending key %d, value %d", message, alarm_set);
 
   app_message_outbox_send();
 }
@@ -236,6 +233,7 @@ static void update_time() {
   //Display this date on the DateLayer
   strftime(date_buffer, sizeof(date_buffer), "%A, %b %e", tick_time);
   text_layer_set_text(date_layer, date_buffer);
+  
 }
 
 /*********************************
@@ -446,7 +444,6 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
   
-  alarm_message(APP_READY, 1); 
 }
 
 static void window_unload(Window *window) {
@@ -485,6 +482,7 @@ static void init(void) {
   
   // Open AppMessage
  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+ 
 }
 
 static void deinit(void) {
