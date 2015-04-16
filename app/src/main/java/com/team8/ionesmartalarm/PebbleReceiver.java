@@ -30,6 +30,22 @@ public class PebbleReceiver extends BroadcastReceiver {
                 // do what you need with the data
                 Long value = data.getUnsignedIntegerAsLong(5);
 
+                if (data.contains(99)) {
+                    // TODO: ready to receive data
+                }
+
+                if (data.contains(10)) {
+                    // DEMO wakeup
+                    Intent newActivity = new Intent(context, SnoozeScreen.class);
+                    newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(newActivity);
+                } else if (data.contains(11)) {
+                    // DEMO getup
+                    Intent newActivity = new Intent(context, FinalAlarmScreen.class);
+                    newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(newActivity);
+                }
+
                 if (value != null && value == 1L && !SmartAlarmManager.isAnyAlarmActive()) {
                     /*Intent newActivity = new Intent(context, FinalAlarmScreen.class);
                     newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

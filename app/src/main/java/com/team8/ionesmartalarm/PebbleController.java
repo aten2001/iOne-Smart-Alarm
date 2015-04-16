@@ -126,6 +126,12 @@ public class PebbleController {
         PebbleKit.sendDataToPebble(context, ALARM_UUID, data);
     }
 
+    public void checkAlarmApp(Context context) {
+        PebbleDictionary data = new PebbleDictionary();
+        data.addUint8(99, (byte) 1);
+        PebbleKit.sendDataToPebble(context, ALARM_UUID, data);
+    }
+
     /**
      * Start the alarm app on a pebble watch
      *
