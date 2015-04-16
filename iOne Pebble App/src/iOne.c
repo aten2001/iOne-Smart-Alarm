@@ -31,19 +31,19 @@ bool SHOW_ALARM = true;
 /*************************************************
  * Send Alarm On/Off Message to Android phone    *
  *************************************************/
-static void alarm_message(uint8_t alarm_set){
+static void alarm_message(int message, uint8_t alarm_set){
   // Begin dictionary
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
 
   // Add a key-value pair
-  dict_write_uint8(iter, ALARM_ON, alarm_set);
+  dict_write_uint8(iter, message, alarm_set);
 
   // Send the message!
   if (alarm_set == 1)
-      APP_LOG(APP_LOG_LEVEL_INFO, "Sending 1 (Alarm On)");
+      APP_LOG(APP_LOG_LEVEL_INFO, "Sending 1");
   else 
-      APP_LOG(APP_LOG_LEVEL_INFO, "Sending 0 (Alarm Off)");
+      APP_LOG(APP_LOG_LEVEL_INFO, "Sending 0");
 
   app_message_outbox_send();
 }
@@ -82,7 +82,7 @@ static void gradual_alarm(void *data) {
     alarm_timer = app_timer_register(((uint16_t) alarm_pattern[alarm_count % (ARRAY_LENGTH(alarm_pattern))]) * 1000, gradual_alarm, NULL);
   else{
     biggest_movement = 0;
-    alarm_message(0); 
+    alarm_message(ALARM_ON, 0); 
     alarm_on_val = 0;
     wake_up_val = 0;
   }
@@ -114,7 +114,7 @@ static void getup_alarm(void *data) {
     alarm_timer = app_timer_register(1000, getup_alarm, NULL);
   else{
     biggest_movement = 0;
-    alarm_message(0);
+    alarm_message(ALARM_ON, 0);
     alarm_on_val = 0;
     get_up_val = 0;
   }
@@ -280,7 +280,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
           get_up_val = 0;
           biggest_movement = 0;
           shake_cnt = 0;
-          alarm_message((uint8_t) 1);
+          alarm_message(ALARM_ON, (uint8_t) 1);
           alarm_on_val = 1;
           gradual_alarm(NULL);
         }
@@ -292,7 +292,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
           wake_up_val = 0;
           biggest_movement = 0;
           shake_cnt = 0;
-          alarm_message((uint8_t) 1);
+          alarm_message(ALARM_ON, (uint8_t) 1);
           alarm_on_val = 1;
           getup_alarm(NULL);
         }
@@ -313,6 +313,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         snprintf(e_buffer, sizeof(e_buffer), "%s", t->value->cstring);
         text_layer_set_text(text_layer, e_buffer);
         alarm_set_message = t->value->cstring;
+        break;
+      case APP_READY:
+        APP_LOG(APP_LOG_LEVEL_INFO, "App Ready Received");
+        alarm_message(APP_READY, 1);
         break;
       case ALARM_ON:
         APP_LOG(APP_LOG_LEVEL_INFO, "Why the hell you sending me Alarm On Key?");
@@ -372,11 +376,21 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
   SHOW_ALARM = false;
 }
 
+static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
+    alarm_message(DEMO_WAKEUP, 1);
+}
+
+static void  multi_click_handler(ClickRecognizerRef recognizer, void *context) {
+    alarm_message(DEMO_GETUP, 1);
+}
+
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
-  window_single_click_subscribe(BUTTON_ID_BACK, select_click_handler);
+  window_single_click_subscribe(BUTTON_ID_BACK, back_click_handler);
+  window_multi_click_subscribe(BUTTON_ID_SELECT, 2, 10, 0, true, multi_click_handler);
+
 }
 
 /*********************************************************************/
@@ -432,6 +446,7 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
   
+  alarm_message(APP_READY, 1); 
 }
 
 static void window_unload(Window *window) {

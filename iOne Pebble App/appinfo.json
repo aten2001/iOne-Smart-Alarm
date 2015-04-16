@@ -9,7 +9,15 @@
     "watchface": false
   },
   "appKeys": {
-    "dummy": 0
+    "WAKE_UP":0,
+    "GET_UP":1,
+    "CALENDAR":2,
+    "WEATHER":3,
+    "ALARM_SET_TIME":4,
+    "ALARM_ON":5,
+    "APP_READY":99,
+    "DEMO_WAKEUP":10,
+    "DEMO_GETUP":11
   },
   "resources": {
     "media": []

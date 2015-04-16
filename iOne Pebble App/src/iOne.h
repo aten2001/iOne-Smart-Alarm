@@ -14,8 +14,8 @@
 #define WEATHER 3
 #define ALARM_SET_TIME 4
 #define ALARM_ON 5
-
-
-
+#define APP_READY 99
+#define DEMO_WAKEUP 10
+#define DEMO_GETUP 11
 
 #endif /* IONE_H_ */
