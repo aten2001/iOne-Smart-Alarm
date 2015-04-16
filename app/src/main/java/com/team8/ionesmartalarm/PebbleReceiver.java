@@ -18,6 +18,7 @@ public class PebbleReceiver extends BroadcastReceiver {
         if (intent.getAction().equals(Constants.INTENT_APP_RECEIVE)
                 && (intent.getSerializableExtra(Constants.APP_UUID)).equals(PebbleController.ALARM_UUID)) {
             final int transactionId = intent.getIntExtra(Constants.TRANSACTION_ID, -1);
+            PebbleKit.sendAckToPebble(context, transactionId);
             final String jsonData = intent.getStringExtra(Constants.MSG_DATA);
             if (jsonData == null || jsonData.isEmpty()) {
                 return;
@@ -29,15 +30,14 @@ public class PebbleReceiver extends BroadcastReceiver {
                 // do what you need with the data
                 Long value = data.getUnsignedIntegerAsLong(5);
 
-                if (value != null && value == 1 && !SmartAlarmManager.isAnyAlarmActive()) {
+                if (value != null && value == 1L && !SmartAlarmManager.isAnyAlarmActive()) {
                     /*Intent newActivity = new Intent(context, FinalAlarmScreen.class);
                     newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(newActivity);*/
                 }
-                else if(value != null){
+                else if (value != null && value == 0L) {
                     context.sendBroadcast(new Intent("PEBBLE_SILENCE"));
                 }
-                PebbleKit.sendAckToPebble(context, transactionId);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
