@@ -23,6 +23,9 @@ public class SnoozeScreen extends ActionBarActivity {
 
     private PowerManager.WakeLock wakeLock;
     private PebbleController pebble;
+    private String weather = "";
+    private String eventDescr = "";
+    private Double temp = 0d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +55,6 @@ public class SnoozeScreen extends ActionBarActivity {
         eventDescription.setText((String)calInfo[4]);
 
         Bundle passedData = this.getIntent().getExtras();
-        String weather = "";
-        String eventDescr = "";
-        Double temp = 0d;
         if(passedData != null) {
             weather = passedData.getString("weatherInfo", "Thunderstorm");
             temp = passedData.getDouble("tempInfo", 20);
@@ -62,14 +62,17 @@ public class SnoozeScreen extends ActionBarActivity {
         }
         //Start the pebble procedure
         pebble = new PebbleController();
-        startPebbleWakeup(weather, temp, eventDescr);
+        startPebbleWakeup();
     }
 
-    private void startPebbleWakeup(String weather, Double temp, String eventDescription){
+    private void startPebbleWakeup(){
         pebble.startAlarmApp(this);
-        pebble.turnOnAlarm(this, true, eventDescription, Integer.toString(temp.intValue())+"º, "+weather);
+        //Try to set the alarm right away
+        pebble.turnOnAlarm(this, true, eventDescr, Integer.toString(temp.intValue())+"º, "+weather);
         Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
         //Register the pebble receiver
+        //registerReceiver()
+        registerReceiver(pebbleReceiveInfo, new IntentFilter("PEBBLE_RECEIVE_DATA"));
         registerReceiver(pebbleSilenceReceiver, new IntentFilter("PEBBLE_SILENCE"));
     }
 
@@ -105,6 +108,7 @@ public class SnoozeScreen extends ActionBarActivity {
 
         pebble.turnOffAlarm(this, true);
         unregisterReceiver(pebbleSilenceReceiver);
+        unregisterReceiver(pebbleReceiveInfo);
         SmartAlarmManager.wakeupAlarmCanceled();
         wakeLock.release();
     }
@@ -113,6 +117,14 @@ public class SnoozeScreen extends ActionBarActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             SnoozeScreen.this.finish();
+        }
+    };
+
+    BroadcastReceiver pebbleReceiveInfo = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            pebble.turnOnAlarm(context, true, eventDescr, Integer.toString(temp.intValue())+"º, "+weather);
+            Log.d("SnoozeScreen", "The alarm should be one and sent");
         }
     };
 }

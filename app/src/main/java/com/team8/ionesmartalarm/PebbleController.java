@@ -74,6 +74,7 @@ public class PebbleController {
      * @param gradual indicates if the alarm should be gradual or not
      */
     public void turnOnAlarm(Context context, boolean gradual, String calendarInfo, String tempAndWeather) {
+        Log.d("PebbleController", "I have tried to launch the pebble alarm.");
         sendDataToWatch(context, gradual ? 0 : 1, (byte) 1, calendarInfo, tempAndWeather);
     }
 

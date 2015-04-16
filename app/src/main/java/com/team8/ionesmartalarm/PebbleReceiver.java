@@ -31,7 +31,7 @@ public class PebbleReceiver extends BroadcastReceiver {
                 Long value = data.getUnsignedIntegerAsLong(5);
 
                 if (data.contains(99)) {
-                    // TODO: ready to receive data
+                    context.sendBroadcast(new Intent("PEBBLE_RECEIVE_DATA"));
                 }
 
                 if (data.contains(10)) {

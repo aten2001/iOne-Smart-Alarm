@@ -9,11 +9,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/alarmState"
-        android:layout_marginStart="18dp"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/alarmStateTitle"
         android:checked="false"
-        android:onClick="onToggleClicked" />
+        android:onClick="onToggleClicked"
+        android:layout_marginStart="17dp"
+        android:layout_alignBaseline="@+id/alarmStateTitle"
+        android:layout_toEndOf="@+id/alarmStateTitle" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -21,7 +21,103 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Application Alarm is:"
         android:id="@+id/alarmStateTitle"
-        android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="21dp" />
+        android:layout_marginLeft="17dp"
+        android:layout_marginBottom="78dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Demo Wakeup"
+        android:id="@+id/demoButtonWakeup"
+        android:onClick="launchDemoWakeup"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Next Alarm:"
+        android:id="@+id/textView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="31dp"
+        android:layout_marginLeft="22dp"
+        android:visibility="invisible" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Time:"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/textView"
+        android:layout_alignStart="@+id/textView"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="12dp"
+        android:visibility="invisible" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Event:"
+        android:id="@+id/textView3"
+        android:layout_below="@+id/textView2"
+        android:layout_alignStart="@+id/textView2"
+        android:layout_marginTop="12dp"
+        android:visibility="invisible" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Weather:"
+        android:id="@+id/textView4"
+        android:layout_below="@+id/textView3"
+        android:layout_alignStart="@+id/textView3"
+        android:layout_marginTop="50dp"
+        android:visibility="invisible" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="No Alarm"
+        android:id="@+id/nextAlarmTime"
+        android:layout_alignTop="@+id/textView2"
+        android:layout_toEndOf="@+id/textView4"
+        android:layout_marginStart="42dp"
+        android:visibility="invisible" />
+
+    <TextView
+        android:layout_width="180dp"
+        android:layout_height="75dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Demo Event"
+        android:id="@+id/nextAlarmEvent"
+        android:visibility="invisible"
+        android:layout_alignTop="@+id/textView3"
+        android:layout_alignStart="@+id/nextAlarmTime" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Hot?"
+        android:id="@+id/nextAlarmWeather"
+        android:layout_alignTop="@+id/textView4"
+        android:layout_alignStart="@+id/nextAlarmEvent"
+        android:visibility="invisible" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Demo Getup"
+        android:onClick="launchDemoGetup"
+        android:id="@+id/button"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

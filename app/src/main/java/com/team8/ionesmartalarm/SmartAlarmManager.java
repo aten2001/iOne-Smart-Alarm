@@ -22,6 +22,9 @@ public class SmartAlarmManager {
     private static final String IS_ACTIVE_DATA = "isSetAlarmActive";
     private static final String IS_ACTIVE_WAKEUP = "isWakeupAlarmActive";
     private static final String IS_ACTIVE_GETUP = "isGetupAlarmActive";
+    private static final String NEXT_ALARM_TIME = "nextAlarmTime";
+    private static final String NEXT_ALARM_EVENT = "nextAlarmEvent";
+    private static final String NEXT_ALARM_WEATHER = "nextAlarmWeather";
     private static final int ALARM_SET_ID = 7009;
     private static final int WAKEUP_ALARM_ID = 5009;
     private static final int GETUP_ALARM_ID = 2111;

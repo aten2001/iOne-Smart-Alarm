@@ -158,6 +158,11 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
                 MainActivity.smartAlarm = new SmartAlarmManager(this);
             }
             MainActivity.smartAlarm.setWakeupAlarm(this, nextWakeTime);
+            Intent newBroadIntent = new Intent("SET_NEXT_ALARM_UI");
+            newBroadIntent.putExtra("time", sdf.format(time));
+            newBroadIntent.putExtra("weatherInfo", this.weatherDescription);
+            newBroadIntent.putExtra("eventDescr", new DataLoader().getFirstScheduleDescription(this));
+            this.getApplicationContext().sendBroadcast(newBroadIntent);
 
             //Send the wakeup time to the pebble
 //            PebbleController pebble = new PebbleController();
