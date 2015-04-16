@@ -378,10 +378,19 @@ public class DataLoader {
         @Override
         protected void onPostExecute(Object[] data) {
             super.onPostExecute(data);
-            Log.i("WeatherLoader", "temperature: " + data[0] + ", weather code: " + data[1]);
 
-            if (alarmPrototype != null) {
-                alarmPrototype.onWeatherTaskCompleted((int) data[0], (int) data[1], (String) data[2]);
+            //Check for random null errors
+            if(data!= null && data.length >= 2) {
+                Log.i("WeatherLoader", "temperature: " + data[0] + ", weather code: " + data[1]);
+
+                if (alarmPrototype != null) {
+                    alarmPrototype.onWeatherTaskCompleted((int) data[0], (int) data[1], (String) data[2]);
+                }
+            }
+            else{
+                if (alarmPrototype != null) {
+                    alarmPrototype.onWeatherTaskCompleted((int) 287, (int)500, (String) "Rain");
+                }
             }
         }
     }

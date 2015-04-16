@@ -49,7 +49,10 @@ public class MainActivity extends ActionBarActivity {
     public void onDestroy(){
         super.onDestroy();
 
-        unregisterReceiver(fillNextAlarmInfo);
+        if(this.isReceieverSet) {
+            unregisterReceiver(fillNextAlarmInfo);
+            isReceieverSet = false;
+        }
     }
 
     @Override
@@ -89,6 +92,7 @@ public class MainActivity extends ActionBarActivity {
             if(!isReceieverSet) {
                 try {
                     registerReceiver(fillNextAlarmInfo, new IntentFilter("SET_NEXT_ALARM_UI"));
+                    isReceieverSet = true;
                 } catch (IllegalArgumentException e) {
                     Log.e("MainActivity", "The receiever was already set.", e);
                 }
