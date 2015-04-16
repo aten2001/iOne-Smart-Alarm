@@ -18,6 +18,8 @@ static TextLayer *time_layer;
 static TextLayer *date_layer;
 static TextLayer *event_layer;
 static TextLayer *weather_layer;
+static AppSync s_sync;
+static uint8_t s_sync_buffer[32];
 static char *alarm_set_message;
 static uint16_t biggest_movement = 0;
 static uint16_t shake_cnt = 0;
@@ -349,6 +351,15 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
+static void sync_changed_handler(const uint32_t key, const Tuple *new_tuple, const Tuple *old_tuple, void *context) {
+  alarm_message(APP_READY, 1);
+
+}
+
+static void sync_error_handler(DictionaryResult dict_error, AppMessageResult app_message_error, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "App sync failed!");
+
+}
 
 /*********************************************************************/
 /*-------------------------------------------------------------------*/
@@ -483,10 +494,18 @@ static void init(void) {
   // Open AppMessage
  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
  
+  // Begin using AppSync
+  Tuplet initial_values[] = {
+    TupletInteger(APP_READY, 99),
+  };
+  app_sync_init(&s_sync, s_sync_buffer, sizeof(s_sync_buffer), initial_values, ARRAY_LENGTH(initial_values), sync_changed_handler, sync_error_handler, NULL);
+ 
 }
 
 static void deinit(void) {
   window_destroy(window);
+  
+  app_sync_deinit(&s_sync);
 }
 
 int main(void) {
