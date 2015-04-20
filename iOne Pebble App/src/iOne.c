@@ -495,23 +495,23 @@ static void init(void) {
  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
  
   // Begin using AppSync
-  Tuplet initial_values[] = {
-    TupletInteger(APP_READY, 99),
-  };
-  app_sync_init(&s_sync, s_sync_buffer, sizeof(s_sync_buffer), initial_values, ARRAY_LENGTH(initial_values), sync_changed_handler, sync_error_handler, NULL);
+  // Tuplet initial_values[] = {
+  //   TupletInteger(APP_READY, 99),
+  // };
+  // app_sync_init(&s_sync, s_sync_buffer, sizeof(s_sync_buffer), initial_values, ARRAY_LENGTH(initial_values), sync_changed_handler, sync_error_handler, NULL);
  
 }
 
 static void deinit(void) {
   window_destroy(window);
   
-  app_sync_deinit(&s_sync);
+  // app_sync_deinit(&s_sync);
 }
 
 int main(void) {
   init();
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", window);
+  APP_LOG(APP_LOG_LEVEL_INFO, "Done initializing, pushed window: %p", window);
 
   app_event_loop();
   deinit();
