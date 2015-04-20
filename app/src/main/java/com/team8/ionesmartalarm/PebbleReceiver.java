@@ -30,9 +30,9 @@ public class PebbleReceiver extends BroadcastReceiver {
                 // do what you need with the data
                 Long value = data.getUnsignedIntegerAsLong(5);
 
-                if (data.contains(99)) {
-                    context.sendBroadcast(new Intent("PEBBLE_RECEIVE_DATA"));
-                }
+//                if (data.contains(99)) {
+//                    context.sendBroadcast(new Intent("PEBBLE_RECEIVE_DATA"));
+//                }
 
                 if (data.contains(10)) {
                     // DEMO wakeup
@@ -44,14 +44,11 @@ public class PebbleReceiver extends BroadcastReceiver {
                     Intent newActivity = new Intent(context, FinalAlarmScreen.class);
                     newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(newActivity);
-                }
-
-                if (value != null && value == 1L && !SmartAlarmManager.isAnyAlarmActive()) {
-                    /*Intent newActivity = new Intent(context, FinalAlarmScreen.class);
+                } else if (value != null && value == 1L && !SmartAlarmManager.isAnyAlarmActive()) {
+                    Intent newActivity = new Intent(context, FinalAlarmScreen.class);
                     newActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(newActivity);*/
-                }
-                else if (value != null && value == 0L) {
+                    context.startActivity(newActivity);
+                } else if (value != null && value == 0L) {
                     context.sendBroadcast(new Intent("PEBBLE_SILENCE"));
                 }
             } catch (JSONException e) {

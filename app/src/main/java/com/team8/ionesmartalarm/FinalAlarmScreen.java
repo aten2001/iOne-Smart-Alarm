@@ -51,10 +51,10 @@ public class FinalAlarmScreen extends ActionBarActivity {
         Bundle passedData = this.getIntent().getExtras();
         String weather = "";
         String eventDescr = "";
-        Double temp = 0d;
+        int temp = 0;
         if(passedData != null) {
             weather = passedData.getString("weatherInfo", "");
-            temp = passedData.getDouble("tempInfo", 0);
+            temp = passedData.getInt("tempInfo", 0);
             eventDescr = passedData.getString("eventDescr", "");
         }
 
@@ -64,10 +64,10 @@ public class FinalAlarmScreen extends ActionBarActivity {
     }
 
 
-    private void startPebbleGetup(String weather, Double temp, String eventDescription){
+    private void startPebbleGetup(String weather, int temp, String eventDescription){
         registerReceiver(pebbleSilenceReceiver, new IntentFilter("PEBBLE_SILENCE"));
         pebble.startAlarmApp(this);
-        pebble.turnOnAlarm(this, false, eventDescription, Integer.toString(temp.intValue())+"°, "+weather);
+        pebble.turnOnAlarm(this, false, eventDescription, Integer.toString(temp)+"°, "+weather);
         Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
     }
 
@@ -106,7 +106,6 @@ public class FinalAlarmScreen extends ActionBarActivity {
     BroadcastReceiver pebbleSilenceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             FinalAlarmScreen.this.finish();
         }
     };

@@ -25,7 +25,7 @@ public class SnoozeScreen extends ActionBarActivity {
     private PebbleController pebble;
     private String weather = "";
     private String eventDescr = "";
-    private Double temp = 0d;
+    private int temp = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +57,7 @@ public class SnoozeScreen extends ActionBarActivity {
         Bundle passedData = this.getIntent().getExtras();
         if(passedData != null) {
             weather = passedData.getString("weatherInfo", "Thunderstorm");
-            temp = passedData.getDouble("tempInfo", 20);
+            temp = passedData.getInt("tempInfo", 20);
             eventDescr = passedData.getString("eventDescr", "No Events");
         }
         //Start the pebble procedure
@@ -68,7 +68,7 @@ public class SnoozeScreen extends ActionBarActivity {
     private void startPebbleWakeup(){
         pebble.startAlarmApp(this);
         //Try to set the alarm right away
-        pebble.turnOnAlarm(this, true, eventDescr, Integer.toString(temp.intValue())+"°, "+weather);
+        pebble.turnOnAlarm(this, true, eventDescr, Integer.toString(temp)+"°, "+weather);
         Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
         //Register the pebble receiver
         //registerReceiver()
@@ -123,7 +123,7 @@ public class SnoozeScreen extends ActionBarActivity {
     BroadcastReceiver pebbleReceiveInfo = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            pebble.turnOnAlarm(context, true, eventDescr, Integer.toString(temp.intValue())+"º, "+weather);
+            pebble.turnOnAlarm(context, true, eventDescr, Integer.toString(temp)+"°, "+weather);
             Log.d("SnoozeScreen", "The alarm should be one and sent");
         }
     };

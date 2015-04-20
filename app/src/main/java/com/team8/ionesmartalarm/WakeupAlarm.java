@@ -20,8 +20,7 @@ import java.text.SimpleDateFormat;
  */
 public class WakeupAlarm extends IntentService implements AlarmPrototype  {
 
-    private int firstScheduleTime, duration = -1;
-    private double temperature = -1;
+    private int firstScheduleTime, duration = -1, temperature = -1;
     private Weather weather = null;
     private String weatherDescription = null;
     private boolean noSchedule = true;

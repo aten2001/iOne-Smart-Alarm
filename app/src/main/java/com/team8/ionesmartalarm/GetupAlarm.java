@@ -20,8 +20,7 @@ import java.text.SimpleDateFormat;
  */
 public class GetupAlarm extends IntentService implements AlarmPrototype {
 
-    private int firstScheduleTime, duration;
-    private double temperature;
+    private int firstScheduleTime, duration, temperature;
     private Weather weather;
     private String weatherDescription = null;
     private boolean isFirstSet;
