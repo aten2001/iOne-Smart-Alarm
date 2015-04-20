@@ -4,14 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.CalendarContract.Events;
-import android.text.format.Time;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -31,6 +28,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Calendar;
 
 /**
  * @author Team 8
@@ -55,17 +53,17 @@ public class DataLoader {
      * @return time value in long, or null if no schedule was found
      */
     public long getFirstScheduleTime(Context context) {
-        Time t = new Time();
-        t.setToNow();
-        String dtStart = Long.toString(t.toMillis(false));
-        t.set(59, 59, 23, t.monthDay, t.month, t.year);
-        String dtEnd = Long.toString(t.toMillis(false));
+        Calendar calendar = Calendar.getInstance();
+        long dtStart = calendar.getTimeInMillis();
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        long dtEnd = calendar.getTimeInMillis();
 
         String selection = "((" + Events.DTSTART + " >= ?) AND (" + Events.DTEND + " <= ?))";
-        String[] selectionArgs = new String[]{dtStart, dtEnd};
+        String[] selectionArgs = new String[]{Long.toString(dtStart), Long.toString(dtEnd)};
 
-        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, null);
+        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, Events.DTSTART);
         mCursor.moveToFirst();
+        Log.d("DataLoader", "first: " + mCursor.getString(0));
 
         long time = mCursor.getCount() == 0 ? -1 : mCursor.getLong(1);
         mCursor.close();
@@ -79,17 +77,17 @@ public class DataLoader {
      * @return title and location of the first schedule
      */
     public String getFirstScheduleDescription(Context context) {
-        Time t = new Time();
-        t.setToNow();
-        String dtStart = Long.toString(t.toMillis(false));
-        t.set(59, 59, 23, t.monthDay, t.month, t.year);
-        String dtEnd = Long.toString(t.toMillis(false));
+        Calendar calendar = Calendar.getInstance();
+        long dtStart = calendar.getTimeInMillis();
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        long dtEnd = calendar.getTimeInMillis();
 
         String selection = "((" + Events.DTSTART + " >= ?) AND (" + Events.DTEND + " <= ?))";
-        String[] selectionArgs = new String[]{dtStart, dtEnd};
+        String[] selectionArgs = new String[]{Long.toString(dtStart), Long.toString(dtEnd)};
 
-        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, null);
+        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, Events.DTSTART);
         mCursor.moveToFirst();
+        Log.d("DataLoader", "first: " + mCursor.getString(0));
 
         String location = mCursor.getCount() == 0 ? null : (mCursor.getString(0) + " @ " + mCursor.getString(3));
         mCursor.close();
@@ -104,17 +102,17 @@ public class DataLoader {
      * @return a list of information about the first schedule
      */
     public Object[] getFirstScheduleInformation(Context context) {
-        Time t = new Time();
-        t.setToNow();
-        String dtStart = Long.toString(t.toMillis(false));
-        t.set(59, 59, 23, t.monthDay, t.month, t.year);
-        String dtEnd = Long.toString(t.toMillis(false));
+        Calendar calendar = Calendar.getInstance();
+        long dtStart = calendar.getTimeInMillis();
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        long dtEnd = calendar.getTimeInMillis();
 
         String selection = "((" + Events.DTSTART + " >= ?) AND (" + Events.DTEND + " <= ?))";
-        String[] selectionArgs = new String[]{dtStart, dtEnd};
+        String[] selectionArgs = new String[]{Long.toString(dtStart), Long.toString(dtEnd)};
 
-        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, null);
+        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, Events.DTSTART);
         mCursor.moveToFirst();
+        Log.d("DataLoader", "first: " + mCursor.getString(0));
 
         if (mCursor.getCount() == 0)
             return null;
@@ -132,17 +130,17 @@ public class DataLoader {
      * @return location of the first schedule
      */
     public String getFirstScheduleLocation(Context context) {
-        Time t = new Time();
-        t.setToNow();
-        String dtStart = Long.toString(t.toMillis(false));
-        t.set(59, 59, 23, t.monthDay, t.month, t.year);
-        String dtEnd = Long.toString(t.toMillis(false));
+        Calendar calendar = Calendar.getInstance();
+        long dtStart = calendar.getTimeInMillis();
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        long dtEnd = calendar.getTimeInMillis();
 
         String selection = "((" + Events.DTSTART + " >= ?) AND (" + Events.DTEND + " <= ?))";
-        String[] selectionArgs = new String[]{dtStart, dtEnd};
+        String[] selectionArgs = new String[]{Long.toString(dtStart), Long.toString(dtEnd)};
 
-        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, null);
+        Cursor mCursor = context.getContentResolver().query(Events.CONTENT_URI, EVENT_COL, selection, selectionArgs, Events.DTSTART);
         mCursor.moveToFirst();
+        Log.d("DataLoader", "first: " + mCursor.getString(0));
 
         String location = mCursor.getCount() == 0 ? null : mCursor.getString(3);
         mCursor.close();
