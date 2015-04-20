@@ -67,7 +67,7 @@ public class FinalAlarmScreen extends ActionBarActivity {
     private void startPebbleGetup(String weather, Double temp, String eventDescription){
         registerReceiver(pebbleSilenceReceiver, new IntentFilter("PEBBLE_SILENCE"));
         pebble.startAlarmApp(this);
-        pebble.turnOnAlarm(this, false, eventDescription, Integer.toString(temp.intValue())+"º, "+weather);
+        pebble.turnOnAlarm(this, false, eventDescription, Integer.toString(temp.intValue())+"°, "+weather);
         Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
     }
 

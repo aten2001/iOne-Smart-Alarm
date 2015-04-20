@@ -115,7 +115,7 @@ public class GetupAlarm extends IntentService implements AlarmPrototype {
     }
 
     public void onAllTasksCompleted() {
-        long time = firstScheduleTime - duration - weather.weight - ((temperature <= 273 || temperature >= 310) ? 600 : 0);
+        long time = firstScheduleTime - duration - weather.weight - ((temperature <= 32 || temperature >= 95) ? 600 : 0);
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm a"); // TEST
         Log.d("GetupAlarm", "final getup alarm time: " + time + " = " + sdf.format(time*1000)); // TEST
 

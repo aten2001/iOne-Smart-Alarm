@@ -67,7 +67,7 @@
         android:id="@+id/textView3"
         android:layout_below="@+id/textView2"
         android:layout_alignStart="@+id/textView2"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="20dp"
         android:visibility="invisible" />
 
     <TextView
@@ -76,10 +76,10 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Weather:"
         android:id="@+id/textView4"
-        android:layout_below="@+id/textView3"
-        android:layout_alignStart="@+id/textView3"
-        android:layout_marginTop="50dp"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/nextAlarmEvent"
+        android:layout_alignStart="@+id/textView3" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -94,7 +94,7 @@
 
     <TextView
         android:layout_width="180dp"
-        android:layout_height="75dp"
+        android:layout_height="85dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Demo Event"
         android:id="@+id/nextAlarmEvent"
@@ -108,9 +108,9 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Hot?"
         android:id="@+id/nextAlarmWeather"
+        android:visibility="invisible"
         android:layout_alignTop="@+id/textView4"
-        android:layout_alignStart="@+id/nextAlarmEvent"
-        android:visibility="invisible" />
+        android:layout_alignStart="@+id/nextAlarmEvent" />
 
     <Button
         android:layout_width="wrap_content"

@@ -365,7 +365,7 @@ public class DataLoader {
                 if (forecast == null) return null;
                 Log.i("WeatherLoader", "forecast: " + forecast.toString()); // TEST
                 Object[] data = new Object[3];
-                data[0] = forecast.getJSONObject("main").getInt("temp");
+                data[0] = (int) Math.round(forecast.getJSONObject("main").getDouble("temp") * 1.8 - 459.67);
                 data[1] = forecast.getJSONArray("weather").getJSONObject(0).getInt("id");
                 data[2] = forecast.getJSONArray("weather").getJSONObject(0).getString("main");
                 return data;

@@ -68,7 +68,7 @@ public class SnoozeScreen extends ActionBarActivity {
     private void startPebbleWakeup(){
         pebble.startAlarmApp(this);
         //Try to set the alarm right away
-        pebble.turnOnAlarm(this, true, eventDescr, Integer.toString(temp.intValue())+"º, "+weather);
+        pebble.turnOnAlarm(this, true, eventDescr, Integer.toString(temp.intValue())+"°, "+weather);
         Log.d("SnoozeAlarm", "Should have turned on the pebble alarm.");
         //Register the pebble receiver
         //registerReceiver()

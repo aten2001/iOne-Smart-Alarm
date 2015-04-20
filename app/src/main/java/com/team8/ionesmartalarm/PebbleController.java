@@ -109,7 +109,7 @@ public class PebbleController {
      */
     public void sendWeatherInfoToWatch(Context context, int temperature, String weather) {
         PebbleDictionary data = new PebbleDictionary();
-        data.addString(3, temperature + "º, " + weather);
+        data.addString(3, temperature + "°, " + weather);
         PebbleKit.sendDataToPebble(context, ALARM_UUID, data);
     }
 

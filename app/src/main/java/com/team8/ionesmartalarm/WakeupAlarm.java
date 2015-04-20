@@ -133,7 +133,7 @@ public class WakeupAlarm extends IntentService implements AlarmPrototype  {
     }
 
     public void onAllTasksCompleted() {
-        long time = firstScheduleTime - duration - weather.weight - ((temperature <= 273 || temperature >= 310) ? 600 : 0) - 1800;
+        long time = firstScheduleTime - duration - weather.weight - ((temperature <= 32 || temperature >= 95) ? 600 : 0) - 1800;
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm a"); // TEST
         Log.d("WakeupAlarm", "final wakeup alarm time: " + time + " = " + sdf.format(time*1000)); // TEST
 
