@@ -387,7 +387,7 @@ public class DataLoader {
             }
             else{
                 if (alarmPrototype != null) {
-                    alarmPrototype.onWeatherTaskCompleted((int) 287, (int)500, (String) "Rain");
+                    alarmPrototype.onWeatherTaskCompleted(287, 500, "Rain");
                 }
             }
         }
